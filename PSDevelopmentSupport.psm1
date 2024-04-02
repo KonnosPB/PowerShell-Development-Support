@@ -43,6 +43,8 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsRepositories.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1")
+. (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsWorkItemsFromJiraTickets.ps1")
+. (Join-Path $PSScriptRoot "DevOps\Test-AzureDevOpsWorkItemMergedIntoDevelop.ps1")
 
 # Jira
 . (Join-Path $PSScriptRoot "Jira\Get-JiraUri.ps1")
@@ -53,6 +55,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 
 # Common
 . (Join-Path $PSScriptRoot "Common\New-ReleaseOverview.ps1")
+. (Join-Path $PSScriptRoot "Common\New-ReleaseExcelWorksheet.ps1")
 . (Join-Path $PSScriptRoot "Common\Test-PSDevSupportEnvironment.ps1")
 . (Join-Path $PSScriptRoot "Common\Get-BusinessCentralArtifactUrl.ps1")
 

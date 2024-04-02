@@ -21,18 +21,18 @@ Example 2:
 PS> Get-JiraUri -Route "issue/ISSUE-1234"
 This example returns the URI for the Jira API to get all fields for the issue with key ISSUE-1234. No additional parameters are added to the URI.
 #>
-function Get-JiraUri{
+function Get-JiraUri {
     Param (
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $Route,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [string] $Parameter = $null        
     )
     $uri = $Global:Config.JiraBaseUrl     
-    if ($Route){
+    if ($Route) {
         $uri += $Route
     }       
-    if ($Parameter){
+    if ($Parameter) {
         $uri += "?$Parameter"
     }
     return($uri)
