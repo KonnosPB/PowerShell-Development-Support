@@ -78,7 +78,7 @@
     'Get-DevSuitePublishedBCAppPackages', 'Import-DevSuiteLicense', 'Invoke-DevSuiteCopy', 
     'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', 
     "Get-JiraTicketsFromSolutionVersion", "Get-JiraCompletedTicketsFromSolutionVersion", "Add-JiraTicketsToPullRequests",
-    "Get-AzureDevOpsRepositories"
+    "Get-AzureDevOpsRepositories", "Get-AzureDevOpsMasterBranchPullRequests"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = '*'

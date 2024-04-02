@@ -14,9 +14,9 @@ function Get-AzureDevOpsMasterBranchPullRequests {
             $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/repositories/$AzureDevOpsRepository/pullrequests" -Parameter "searchCriteria.targetRefName=refs/heads/master&searchCriteria.status=active"
             $pullRequests = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken              
             $jContent = $pullRequests.Content | ConvertFrom-Json
-            foreach ($pr in $jContent.value) {
-                $pr.repository = $repository
-                $result += $pr                
+            foreach ($pullRequest in $jContent.value) {
+                $pullRequest.repository = $repository
+                $result += $pullRequest                
             }
         }
         catch {            
