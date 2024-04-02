@@ -47,9 +47,9 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "Jira\Get-JiraUri.ps1")
 . (Join-Path $PSScriptRoot "Jira\Invoke-JiraWebRequest.ps1")
 #. (Join-Path $PSScriptRoot "Jira\Get-JiraTicketsFromPullRequests.ps1")
-#. (Join-Path $PSScriptRoot "Jira\Add-JiraTicketsToPullRequests")
+. (Join-Path $PSScriptRoot "Jira\Add-JiraTicketsToPullRequests.ps1")
 . (Join-Path $PSScriptRoot "Jira\Get-JiraTicketsFromSolutionVersion.ps1")
-
+. (Join-Path $PSScriptRoot "Jira\Get-JiraCompletedTicketsFromSolutionVersion.ps1")
 
 # Common
 . (Join-Path $PSScriptRoot "Common\New-ReleaseOverview.ps1")

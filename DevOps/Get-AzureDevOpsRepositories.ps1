@@ -14,3 +14,5 @@ function Get-AzureDevOpsRepositories{
     }
     return $result
 }
+
+Export-ModuleMember -Function Get-AzureDevOpsRepositories

@@ -76,7 +76,9 @@
     'Invoke-DevSuiteMigrate', 'Wait-DevSuiteTenantsReady', 'Install-DevSuiteBCAppPackage', 
     'Get-DevSuiteAvailableBCAppPackages', 'Get-DevSuiteAvailableBCAppPackage', 'Get-DevSuiteAvailableBCAppPackage', 
     'Get-DevSuitePublishedBCAppPackages', 'Import-DevSuiteLicense', 'Invoke-DevSuiteCopy', 
-    'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', "Get-JiraTicketsFromSolutionVersion"
+    'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', 
+    "Get-JiraTicketsFromSolutionVersion", "Get-JiraCompletedTicketsFromSolutionVersion", "Add-JiraTicketsToPullRequests",
+    "Get-AzureDevOpsRepositories"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = '*'
@@ -103,7 +105,8 @@
         "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1", "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1", "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1", 
         "DevSuite\Import-DevSuiteLicense.ps1", "DevSuite\Invoke-DevSuiteCopy.ps1", "DevSuite\New-DevSuiteUser.ps1", "DevSuite\Import-DevSuiteTestToolkit.ps1", 
         "DevOps\Get-AzureDevOpsUri.ps1", "DevOps\Invoke-AzureDevOpsWebRequest.ps1", "DevOps\Get-AzureDevOpsRepositories.ps1", 
-        "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "Jira\Get-JiraUri.ps1", "Jira\Invoke-JiraWebRequest.ps1", "Jira\Get-JiraTicketsFromSolutionVersion.ps1",
+        "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "Jira\Get-JiraUri.ps1", "Jira\Invoke-JiraWebRequest.ps1", 
+        "Jira\Get-JiraTicketsFromSolutionVersion.ps1", "Jira\Get-JiraCompletedTicketsFromSolutionVersion.ps1", "Jira\Add-JiraTicketsToPullRequests.ps1",
         "Jira\Add-JiraTicketsToPullRequests.ps1", "Common\New-ReleaseOverview.ps1", "Common\Test-PSDevSupportEnvironment.ps1", 
         "Common\Get-BusinessCentralArtifactUrl.ps1" )
     

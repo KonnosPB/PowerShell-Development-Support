@@ -8,5 +8,10 @@ Describe "JIRA Test" {
             $result = Get-JiraTicketsFromSolutionVersion -JiraProject $Global:Config.JiraHealthcareProject -Version '23.5' -JiraApiToken $Global:JiraApiToken
             $result.Count | Should -BeGreaterThan 0
         }               
+
+        It "it should provide the correct completed jira tickets" {  
+            $result = Get-JiraCompletedTicketsFromSolutionVersion -JiraProject $Global:Config.JiraHealthcareProject -Version '23.5' -JiraApiToken $Global:JiraApiToken
+            $result.Count | Should -BeGreaterThan 0
+        }     
     }    
 }

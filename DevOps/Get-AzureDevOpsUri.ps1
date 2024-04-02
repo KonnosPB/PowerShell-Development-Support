@@ -7,7 +7,7 @@ function Get-AzureDevOpsUri{
         [Parameter(Mandatory=$false)]
         [string] $Parameter = $null        
     )
-    $uri = "https://dev.azure.com/$Global:AzureDevOpsOrganisation/$AzureDevOpsProject/"
+    $uri = "https://dev.azure.com/$($Global:Config.AzureDevOpsOrganisation)/$AzureDevOpsProject/"
     if ($Route){
         $uri += $Route
     }       
