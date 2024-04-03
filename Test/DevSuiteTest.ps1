@@ -1,9 +1,9 @@
 
 BeforeAll {
     . (Join-Path $PSScriptRoot '_InitTest.ps1')    
-    if (-not (Test-DevSuiteBearerToken -BearerToken $Global:DevSuiteBearerToken)){
-        Update-DevSuiteBearerToken -BearerTokenApplication $Global:Config.BearerTokenApplicationPath
-    }
+    # if (-not (Test-DevSuiteBearerToken -BearerToken $Global:DevSuiteBearerToken)){
+    #     Update-DevSuiteBearerToken -BearerTokenApplication $Global:Config.BearerTokenApplicationPath
+    # }
 }
 
 Describe "DevSuite " {
@@ -19,24 +19,23 @@ Describe "DevSuite " {
             $newDevSuiteProjectDescription = 'HC BC24.0 DE Produktentw. KPA'            
             $newTenant = $oldTenant 
             $artifactUrl = 'https://bcartifacts.azureedge.net/sandbox/23.5.16502.16887/de'
-
             
-            # $devSuite = New-DevSuiteEnvironment -BearerToken $Global:DevSuiteBearerToken `
-            #     -ProjectNo $Global:Config.DevSuiteHealthcareProjectNo `
-            #     -ProjectDescription 'HC BC24.0 DE Produktentw. KPA' `
-            #     -CustomerNo $Global:Config.DevSuiteCustomerNo `
-            #     -CustomerName $Global:Config.DevSuiteCustomerName `
-            #     -ProjectManagement $Global:Config.DevSuiteProjectManagement `
-            #     -Branch $Global:Config.DevSuiteBranch `
-            #     -Department $Global:Config.DevSuiteDepartment `
-            #     -CostCenter $Global:Config.DevSuiteCostCenter `
-            #     -LeadDeveloper $Global:Config.DevSuiteLeadDeveloper `
-            #     -ArtifactUrl $artifactUrl  `
-            #     -AzureDevOps $Global:Config.DevSuiteHealthcareAzureDevOps `
-            #     -KUMATarget $Global:Config.DevSuiteHealthcareKUMATarget  | Should -Not -BeNullOrEmpty 
-            # $devSuite.projectDescription | Should -BeExactly $projectDescription                        
+            $devSuite = New-DevSuiteEnvironment -BearerToken $Global:DevSuiteBearerToken `
+                -ProjectNo $Global:Config.DevSuiteMedtecProjectNo `
+                -ProjectDescription 'MEDTEC BC24.0 DE Produktentw.' `
+                -CustomerNo $Global:Config.DevSuiteCustomerNo `
+                -CustomerName $Global:Config.DevSuiteCustomerName `
+                -ProjectManagement $Global:Config.DevSuiteProjectManagement `
+                -Branch $Global:Config.DevSuiteBranch `
+                -Department $Global:Config.DevSuiteDepartment `
+                -CostCenter $Global:Config.DevSuiteCostCenter `
+                -LeadDeveloper $Global:Config.DevSuiteLeadDeveloper `
+                -ArtifactUrl $artifactUrl  `
+                -AzureDevOps $Global:Config.DevSuiteMedtecAzureDevOps `
+                -KUMATarget $Global:Config.DevSuiteMedtecKUMATarget  | Should -Not -BeNullOrEmpty 
+            $devSuite.projectDescription | Should -BeExactly $projectDescription                        
 
-            # Wait-DevSuiteTenantsReady -DevSuite $newDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
+            Wait-DevSuiteTenantsReady -DevSuite $newDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
 
             $oldDevSuite = Get-DevSuiteEnvironment -NameOrDescription $oldDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
             $oldDevSuite | Should -Not -BeNullOrEmpty

@@ -1,29 +1,31 @@
 <#
 .SYNOPSIS
-This function imports the test toolkit for a specified DevSuite and Tenant.
+The Import-DevSuiteTestToolkit function is used to import the DevSuite Test Toolkit into a specific tenant.
 
 .DESCRIPTION
-The Import-DevSuiteTestToolkit function imports the test toolkit for a specified DevSuite and Tenant. The function makes a POST web request to the DevSuite Uri retrieved by the Get-DevSuiteUri function. The Uri includes parameters for specifying whether to include only test libraries or the test framework.
+The Import-DevSuiteTestToolkit function is a powershell function that is used to import the DevSuite Test Toolkit into a tenant. It uses the Invoke-DevSuiteWebRequest function to send a POST request to the DevSuite API. The function can also be configured to only include the test libraries or the test framework.
 
 .PARAMETER DevSuite
-The DevSuite parameter is a mandatory string parameter that specifies the name of the DevSuite.
+This is a mandatory string parameter that specifies the DevSuite to be imported.
 
 .PARAMETER Tenant
-The Tenant parameter is a mandatory string parameter that specifies the name of the Tenant.
+This is a mandatory string parameter that specifies the tenant into which the DevSuite Test Toolkit will be imported.
 
 .PARAMETER IncludeTestLibrariesOnly
-The IncludeTestLibrariesOnly parameter is an optional boolean parameter that specifies whether to include only test libraries in the import. The default value is $true.
+This is a bool parameter that is optional. If set to true, only the test libraries will be imported. By default, it is set to true.
 
 .PARAMETER IncludeTestFrameworkOnly
-The IncludeTestFrameworkOnly parameter is an optional boolean parameter that specifies whether to include only the test framework in the import. The default value is $false.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
+This is a bool parameter that is optional. If set to true, only the test framework will be imported. By default, it is set to false.
 
 .EXAMPLE
-Import-DevSuiteTestToolkit -DevSuite "DevSuite1" -Tenant "Tenant1" -BearerToken "abc123"
+Import-DevSuiteTestToolkit -DevSuite "DevSuite1" -Tenant "Tenant1"
 
-This example imports the test toolkit for the DevSuite named "DevSuite1" and the Tenant named "Tenant1", using the bearer token "abc123". By default, it includes only test libraries in the import.
+This example will import the DevSuite Test Toolkit into the specified tenant with only the test libraries.
+
+.EXAMPLE
+Import-DevSuiteTestToolkit -DevSuite "DevSuite1" -Tenant "Tenant1" -IncludeTestFrameworkOnly $true
+
+This example will import the DevSuite Test Toolkit into the specified tenant with only the test framework.
 #>
 function Import-DevSuiteTestToolkit {
     Param (
@@ -34,13 +36,11 @@ function Import-DevSuiteTestToolkit {
         [Parameter(Mandatory = $false)]
         [bool] $IncludeTestLibrariesOnly = $true,
         [Parameter(Mandatory = $false)]
-        [bool] $IncludeTestFrameworkOnly = $false,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [bool] $IncludeTestFrameworkOnly = $false
     )   
 
     $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/importtesttoolkit" -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -BearerToken $BearerToken
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 }
 
 Export-ModuleMember -Function Import-DevSuiteTestToolkit

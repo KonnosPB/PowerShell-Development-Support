@@ -1,26 +1,23 @@
 <#
 .SYNOPSIS
-This function creates a new user for a specified DevSuite and Tenant.
+This function creates a new user in the specified Development Suite and Tenant.
 
 .DESCRIPTION
-The New-DevSuiteUser function creates a new user for a specified DevSuite and Tenant. The function makes a POST web request to the DevSuite Uri retrieved by the Get-DevSuiteUri function. The Uri includes the DevSuite name, Tenant name and the new UserName.
+The New-DevSuiteUser function uses the Invoke-DevSuiteWebRequest to send a POST request to the corresponding DevSuite and Tenant specified by the user. The UserName is used as the new user's name. 
 
 .PARAMETER DevSuite
-The DevSuite parameter is a mandatory string parameter that specifies the name of the DevSuite.
+Specifies the Development Suite where the user will be created. This parameter is mandatory.
 
 .PARAMETER Tenant
-The Tenant parameter is a mandatory string parameter that specifies the name of the Tenant.
+Specifies the Tenant where the user will be created. This parameter is mandatory.
 
 .PARAMETER UserName
-The UserName parameter is a mandatory string parameter that specifies the name of the new user to be created.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
+Specifies the name of the new user to be created. This parameter is mandatory.
 
 .EXAMPLE
-New-DevSuiteUser -DevSuite "DevSuite1" -Tenant "Tenant1" -UserName "User1" -BearerToken "abc123"
+New-DevSuiteUser -DevSuite "DevSuite1" -Tenant "Tenant1" -UserName "User1"
 
-This example creates a new user named "User1" for the DevSuite named "DevSuite1" and the Tenant named "Tenant1", using the bearer token "abc123".
+This example creates a new user named User1 in the DevSuite1 and Tenant1.
 #>
 function New-DevSuiteUser {
     Param (
@@ -29,13 +26,11 @@ function New-DevSuiteUser {
         [Parameter(Mandatory = $true)]
         [string] $Tenant,
         [Parameter(Mandatory = $true)]
-        [string] $UserName,        
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [string] $UserName
     )      
 
     $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/user/$UserName"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -BearerToken $BearerToken
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' 
 }
 
 Export-ModuleMember -Function New-DevSuiteUser

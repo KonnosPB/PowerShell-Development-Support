@@ -1,29 +1,31 @@
 <#
 .SYNOPSIS
-This function tests if a specified DevSuite environment exists.
+This function checks if a DevSuite environment exists based on the provided name or description.
 
 .DESCRIPTION
-The Test-DevSuiteEnvironment function checks if a specified DevSuite environment exists. It uses the Get-DevSuiteEnvironment function to retrieve the environment based on the provided NameOrDescription. If the environment exists, the function returns $true, otherwise it returns $false.
+The 'Test-DevSuiteEnvironment' function is used to check if a DevSuite environment exists. It accepts a name or description as a parameter and returns a boolean value, true if the environment exists and false if it does not.
 
 .PARAMETER NameOrDescription
-The NameOrDescription parameter is a mandatory string parameter that specifies the name or description of the DevSuite environment to be checked.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token used for authenticating the web request.
+This parameter accepts a string value. The value can either be the name or description of the DevSuite environment that is to be checked. This parameter is mandatory.
 
 .EXAMPLE
-Test-DevSuiteEnvironment -NameOrDescription "DevSuite1" -BearerToken "abc123"
+```powershell
+PS C:\> Test-DevSuiteEnvironment -NameOrDescription "Test Environment"
+```
+This command checks if a DevSuite environment with the name or description "Test Environment" exists and returns true or false.
 
-This example checks if a DevSuite environment with the name or description "DevSuite1" exists, using the bearer token "abc123".
+.EXAMPLE
+```powershell
+PS C:\> Test-DevSuiteEnvironment -NameOrDescription "NonExistentEnvironment"
+```
+This command checks if a DevSuite environment with the name or description "NonExistentEnvironment" exists. Since no such environment exists, it will return false.
 #>
 function Test-DevSuiteEnvironment {
     Param (
         [Parameter(Mandatory = $true)]
-        [string] $NameOrDescription,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [string] $NameOrDescription
     )
-    $devSuiteEnvironment = Get-DevSuiteEnvironment -NameOrDescription $NameOrDescription -BearerToken $BearerToken
+    $devSuiteEnvironment = Get-DevSuiteEnvironment -NameOrDescription $NameOrDescription 
     if ($devSuiteEnvironment) {
         return $true
     }

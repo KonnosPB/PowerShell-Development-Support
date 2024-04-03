@@ -1,29 +1,26 @@
 <#
 .SYNOPSIS
-This function copies a tenant from a source tenant to a destination tenant within a specified DevSuite.
+A function to copy a tenant from one DevSuite to another.
 
 .DESCRIPTION
-The Invoke-DevSuiteCopy function copies a tenant from a source tenant to a destination tenant within a specified DevSuite. The function retrieves the source tenant using the Get-DevSuiteTenant function and throws an error if the tenant does not exist. The function then initiates a POST web request to the DevSuite Uri to copy the tenant. The function waits for up to a specified number of minutes for the copy process to complete.
+The Invoke-DevSuiteCopy function is used to copy a tenant from a source DevSuite to a destination DevSuite. The function checks if the source tenant exists in the source DevSuite, then sends a POST request to the DevSuite API to initiate the tenant copy. The function then waits for the copy to be complete or until a specified timeout period has been reached.
 
 .PARAMETER DevSuite
-The DevSuite parameter is a mandatory string parameter that specifies the name of the DevSuite.
+The name of the DevSuite environment where the source tenant resides. This parameter is mandatory.
 
 .PARAMETER SourceTenant
-The SourceTenant parameter is a mandatory string parameter that specifies the name of the source tenant.
+The name of the tenant in the source DevSuite that is to be copied. This parameter is mandatory.
 
 .PARAMETER DestinationTenant
-The DestinationTenant parameter is a mandatory string parameter that specifies the name of the destination tenant.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
+The name of the tenant in the destination DevSuite where the source tenant will be copied to. This parameter is mandatory.
 
 .PARAMETER TimeoutMinutes
-The TimeoutMinutes parameter is an optional integer parameter that specifies the timeout for the copy process in minutes. The default value is 15 minutes.
+The maximum time, in minutes, the function will wait for the copy process to complete. If this parameter is not specified, the default value is 15 minutes. This parameter is optional.
 
 .EXAMPLE
-Invoke-DevSuiteCopy -DevSuite "DevSuite1" -SourceTenant "Tenant1" -DestinationTenant "Tenant2" -BearerToken "abc123"
+Invoke-DevSuiteCopy -DevSuite "DevSuite1" -SourceTenant "Tenant1" -DestinationTenant "Tenant2" -TimeoutMinutes 30
 
-This example copies the tenant named "Tenant1" to the tenant named "Tenant2" within the DevSuite named "DevSuite1", using the bearer token "abc123". The function will wait for up to 15 minutes for the copy process to complete.
+This example copies Tenant1 from DevSuite1 to Tenant2 in the same DevSuite and waits for a maximum of 30 minutes for the copy process to complete.
 #>
 function Invoke-DevSuiteCopy {
     Param (      
@@ -33,19 +30,17 @@ function Invoke-DevSuiteCopy {
         [string] $SourceTenant,
         [Parameter(Mandatory = $true)]
         [string] $DestinationTenant,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken,
         [Parameter(Mandatory = $false)]
         [int] $TimeoutMinutes = 15
     )   
 
-    $sourceTenantObj = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $SourceTenant -BearerToken $BearerToken
+    $sourceTenantObj = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $SourceTenant
     if (-not $sourceTenantObj) {
         throw "Source tenant $SourceTenant doesn't exist in $DevSuite"
     } 
 
     $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$SourceTenant/copyTo/$DestinationTenant"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -BearerToken $BearerToken
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -55,7 +50,7 @@ function Invoke-DevSuiteCopy {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         Write-Host "Waiting $minutes minutes: " -NoNewline 
-        $tenant = Get-DevSuiteTenant -DevSuite $DestinationDevSuite -Tenant $DestinationTenant -BearerToken $BearerToken
+        $tenant = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $DestinationTenant
         if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {          
             return $true            
         }    

@@ -1,35 +1,30 @@
 <#
 .SYNOPSIS
-This function retrieves published Business Central App packages from a specific tenant in a DevSuite.
+This function retrieves the published Business Central application packages from a specific DevSuite tenant.
 
 .DESCRIPTION
-The Get-DevSuitePublishedBCAppPackages function uses the DevSuite, Tenant, and BearerToken parameters to retrieve a list of published Business Central App packages from a specific tenant in a DevSuite.
+Get-DevSuitePublishedBCAppPackages is a function that queries the DevSuite environment for the list of published Business Central application packages. It uses DevSuite's web request functionality to make a GET request to the specified tenant's appInfo route.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the published Business Central App packages will be retrieved.
+A mandatory parameter. This is the DevSuite environment from which the function retrieves the application packages.
 
 .PARAMETER Tenant
-This is a mandatory parameter that specifies the tenant in the DevSuite from which the published Business Central App packages will be retrieved.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+A mandatory parameter. This is the specific tenant in the DevSuite environment from which the function retrieves the application packages.
 
 .EXAMPLE
-Get-DevSuitePublishedBCAppPackages -DevSuite "DevSuite1" -Tenant "Tenant1" -BearerToken "1234567890"
+Get-DevSuitePublishedBCAppPackages -DevSuite "TestEnvironment" -Tenant "Tenant1"
 
-This example retrieves the published Business Central App packages from the tenant "Tenant1" in DevSuite "DevSuite1" using the BearerToken "1234567890" for authentication.
+This example retrieves the published Business Central application packages from the "Tenant1" in the "TestEnvironment" DevSuite environment.
 #>
 function Get-DevSuitePublishedBCAppPackages {
     Param (
         [Parameter(Mandatory = $true)]
         [string] $DevSuite,
         [Parameter(Mandatory = $true)]
-        [string] $Tenant,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [string] $Tenant
     )    
     $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/appInfo"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET' -BearerToken $BearerToken
+    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
     $appPackages = $response.Content | ConvertFrom-Json
     return $appPackages
 }

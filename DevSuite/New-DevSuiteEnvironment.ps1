@@ -1,56 +1,54 @@
 ﻿<#
 .SYNOPSIS
-This function creates a new DevSuite environment with a specified configuration.
+This function creates a new environment in DevSuite.
 
 .DESCRIPTION
-The New-DevSuiteEnvironment function creates a new DevSuite environment with a specified configuration. The function uses the configuration parameters to create a JSON object, which is then sent to the DevSuite Uri via a POST web request. After initiating the creation of the environment, the function waits for up to a specified number of minutes for the environment to become available.
+The New-DevSuiteEnvironment function creates a new environment in DevSuite. It requires several mandatory parameters including project number, project description, project management, customer number, customer name, branch, department, cost center, lead developer, artifact URL, Azure DevOps, and Kuma target.
 
 .PARAMETER ProjectNo
-The ProjectNo parameter is a mandatory string parameter that specifies the project number.
+The number of the project. This parameter is mandatory.
 
 .PARAMETER ProjectDescription
-The ProjectDescription parameter is a mandatory string parameter that specifies the project description.
+The description of the project. This parameter is mandatory.
 
 .PARAMETER ProjectManagement
-The ProjectManagement parameter is a mandatory string parameter that specifies the project manager.
+The management of the project. This parameter is mandatory.
 
 .PARAMETER CustomerNo
-The CustomerNo parameter is a mandatory string parameter that specifies the customer number.
+The number of the customer. This parameter is mandatory.
 
 .PARAMETER CustomerName
-The CustomerName parameter is a mandatory string parameter that specifies the customer name.
+The name of the customer. This parameter is mandatory.
 
 .PARAMETER Branch
-The Branch parameter is a mandatory string parameter that specifies the branch.
+The branch for the project. This parameter is mandatory.
 
 .PARAMETER Department
-The Department parameter is a mandatory string parameter that specifies the department.
+The department for the project. This parameter is mandatory.
 
 .PARAMETER CostCenter
-The CostCenter parameter is a mandatory string parameter that specifies the cost center.
+The cost center for the project. This parameter is mandatory.
 
 .PARAMETER LeadDeveloper
-The LeadDeveloper parameter is a mandatory string parameter that specifies the lead developer.
+The lead developer for the project. This parameter is mandatory.
 
 .PARAMETER ArtifactUrl
-The ArtifactUrl parameter is a mandatory string parameter that specifies the artifact URL.
+The URL for the artifact. This parameter is mandatory.
 
 .PARAMETER AzureDevOps
-The AzureDevOps parameter is a mandatory string parameter that specifies the Azure DevOps.
+The Azure DevOps for the project. This parameter is mandatory.
 
 .PARAMETER KumaTarget
-The KumaTarget parameter is a mandatory string parameter that specifies the Kuma target.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
+The Kuma target for the project. This parameter is mandatory.
 
 .PARAMETER TimeoutMinutes
-The TimeoutMinutes parameter is an optional integer parameter that specifies the timeout for the creation process in minutes. The default value is 45 minutes.
+The timeout in minutes. This parameter is optional. If not provided, the function will default to 45 minutes.
 
 .EXAMPLE
-New-DevSuiteEnvironment -ProjectNo "12345" -ProjectDescription "Project1" -ProjectManagement "Manager1" -CustomerNo "Cust1" -CustomerName "Customer1" -Branch "Branch1" -Department "Dept1" -CostCenter "CC1" -LeadDeveloper "Developer1" -ArtifactUrl "https://artifacturl.com" -AzureDevOps "https://azuredevops.com" -KumaTarget "Target1" -BearerToken "abc123"
-
-This example creates a new DevSuite environment with the specified configuration, using the bearer token "abc123". The function will wait for up to 45 minutes for the environment to become available.
+```PowerShell
+New-DevSuiteEnvironment -ProjectNo '123' -ProjectDescription 'This is a test project' -ProjectManagement 'John Doe' -CustomerNo '456' -CustomerName 'Test Customer' -Branch 'dev' -Department 'IT' -CostCenter '789' -LeadDeveloper 'Jane Doe' -ArtifactUrl 'http://artifacturl.com' -AzureDevOps 'http://devops.com' -KumaTarget 'test' -TimeoutMinutes 30
+```
+This example creates a new environment in DevSuite with the provided parameters and a timeout of 30 minutes.
 #>
 function New-DevSuiteEnvironment {
     Param (
@@ -78,8 +76,6 @@ function New-DevSuiteEnvironment {
         [string] $AzureDevOps,
         [Parameter(Mandatory = $true)]
         [string] $KumaTarget,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken,
         [Parameter(Mandatory = $false)]
         [int] $TimeoutMinutes = 45
     )
@@ -100,7 +96,7 @@ function New-DevSuiteEnvironment {
     } | ConvertTo-Json
 
     $uri = Get-DevSuiteUri -Route 'vm'
-    Invoke-DevSuiteWebRequest -Uri $uri -Method POST -BearerToken $BearerToken -Body $jsonObject
+    Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -110,8 +106,8 @@ function New-DevSuiteEnvironment {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         Write-Host "Waiting $minutes minutes: " -NoNewline
-        if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription -BearerToken $BearerToken) {            
-            $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription -BearerToken $BearerToken
+        if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription ) {            
+            $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription 
             return $devSuite            
         }    
         Start-Sleep -Seconds 5
@@ -119,6 +115,3 @@ function New-DevSuiteEnvironment {
     throw "New-DevSuiteEnvironment timeout"
 }
 Export-ModuleMember -Function  New-DevSuiteEnvironment
-
-
-

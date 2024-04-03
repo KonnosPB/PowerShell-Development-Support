@@ -1,38 +1,35 @@
 <#
 .SYNOPSIS
-This function migrates a tenant from a source DevSuite to a destination DevSuite.
+The Invoke-DevSuiteMigrate function migrates a tenant from one DevSuite to another.
 
 .DESCRIPTION
-The Invoke-DevSuiteMigrate function migrates a tenant from a source DevSuite to a destination DevSuite within a specified resource group. The function retrieves the source tenant using the Get-DevSuiteTenant function and throws an error if the tenant does not exist. The function then initiates a POST web request to the DevSuite Uri to migrate the tenant. The function waits for up to a specified number of minutes for the migration process to complete.
+This function retrieves the source tenant, constructs a JSON object with the necessary migration information, and sends a web request to initiate the migration. It will then wait until the migration is complete or the timeout has been reached.
 
 .PARAMETER SourceResourceGroup
-The SourceResourceGroup parameter is a mandatory string parameter that specifies the name of the source resource group.
+The name of the resource group of the source DevSuite.
 
 .PARAMETER SourceDevSuite
-The SourceDevSuite parameter is a mandatory string parameter that specifies the name of the source DevSuite.
+The name of the source DevSuite.
 
 .PARAMETER SourceTenant
-The SourceTenant parameter is a mandatory string parameter that specifies the name of the source tenant.
+The name of the tenant in the source DevSuite.
 
 .PARAMETER DestinationResourceGroup
-The DestinationResourceGroup parameter is a mandatory string parameter that specifies the name of the destination resource group.
+The name of the resource group of the destination DevSuite.
 
 .PARAMETER DestinationDevSuite
-The DestinationDevSuite parameter is a mandatory string parameter that specifies the name of the destination DevSuite.
+The name of the destination DevSuite.
 
 .PARAMETER DestinationTenant
-The DestinationTenant parameter is a mandatory string parameter that specifies the name of the destination tenant.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
+The name of the tenant in the destination DevSuite.
 
 .PARAMETER TimeoutMinutes
-The TimeoutMinutes parameter is an optional integer parameter that specifies the timeout for the migration process in minutes. The default value is 45 minutes.
+The time in minutes that the function should wait for the migration to complete before timing out. This is optional and defaults to 45 minutes.
 
 .EXAMPLE
-Invoke-DevSuiteMigrate -SourceResourceGroup "RG1" -SourceDevSuite "DevSuite1" -SourceTenant "Tenant1" -DestinationResourceGroup "RG2" -DestinationDevSuite "DevSuite2" -DestinationTenant "Tenant2" -BearerToken "abc123"
+Invoke-DevSuiteMigrate -SourceResourceGroup "ResourceGroup1" -SourceDevSuite "DevSuite1" -SourceTenant "Tenant1" -DestinationResourceGroup "ResourceGroup2" -DestinationDevSuite "DevSuite2" -DestinationTenant "Tenant2"
 
-This example migrates the tenant named "Tenant1" from the DevSuite named "DevSuite1" in the resource group named "RG1" to the tenant named "Tenant2" within the DevSuite named "DevSuite2" in the resource group named "RG2", using the bearer token "abc123". The function will wait for up to 45 minutes for the migration process to complete.
+This example migrates "Tenant1" from "DevSuite1" in "ResourceGroup1" to "DevSuite2" in "ResourceGroup2", naming the tenant "Tenant2" in the destination DevSuite. It will wait up to 45 minutes for the migration to complete.
 #>
 function Invoke-DevSuiteMigrate {
     Param (
@@ -48,13 +45,11 @@ function Invoke-DevSuiteMigrate {
         [string] $DestinationDevSuite,
         [Parameter(Mandatory = $true)]
         [string] $DestinationTenant,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken,
         [Parameter(Mandatory = $false)]
         [int] $TimeoutMinutes = 45
     )   
 
-    $sourceTenantObj = Get-DevSuiteTenant -DevSuite $SourceDevSuite -Tenant $SourceTenant -BearerToken $BearerToken
+    $sourceTenantObj = Get-DevSuiteTenant -DevSuite $SourceDevSuite -Tenant $SourceTenant
     if (-not $sourceTenantObj) {
         throw "Source tenant $SourceTenant doesn't exist in $SourceDevSuite"
     }
@@ -69,7 +64,7 @@ function Invoke-DevSuiteMigrate {
     } | ConvertTo-Json
 
     $uri = Get-DevSuiteUri -Route "migrateTenant/async"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -BearerToken $BearerToken -Body $jsonObject 
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject 
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -79,7 +74,7 @@ function Invoke-DevSuiteMigrate {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         Write-Host "Waiting $minutes minutes: " -NoNewline
-        $tenant = Get-DevSuiteTenant -DevSuite $DestinationDevSuite -Tenant $DestinationTenant -BearerToken $BearerToken
+        $tenant = Get-DevSuiteTenant -DevSuite $DestinationDevSuite -Tenant $DestinationTenant 
         if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {          
             return $true            
         }    

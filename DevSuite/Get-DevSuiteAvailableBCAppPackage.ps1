@@ -1,34 +1,33 @@
 <#
 .SYNOPSIS
-This function fetches available Business Central App packages from a specified DevSuite.
+This function retrieves the latest version of a specified application from a given DevSuite.
 
 .DESCRIPTION
-The function Get-DevSuiteAvailableBCAppPackage uses the DevSuite and BearerToken parameters to retrieve a list of available Business Central App packages. It allows filtering by AppName, and optionally by whether the app is a Test App or a Preview. The function returns the last app in the sorted list.
+The Get-DevSuiteAvailableBCAppPackage function is used to get the latest version of a specified application package from a given DevSuite. The application package is identified by the $AppName parameter. By default, the function only returns non-test and non-preview versions of the application package, but this can be modified by using the $TestApp and $Preview switch parameters.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the available Business Central App packages will be fetched.
+The DevSuite parameter is a mandatory string parameter that specifies the DevSuite from which the application package is to be retrieved.
 
 .PARAMETER AppName
-This is a mandatory parameter that specifies the name of the app to filter from the list of available Business Central App packages.
+The AppName parameter is a mandatory string parameter that specifies the name of the application package to be retrieved.
 
 .PARAMETER TestApp
-This is an optional switch parameter. If used, the function will include Test Apps in its return. If not used, Test Apps will be excluded.
+The TestApp parameter is an optional switch parameter. When this switch is used, the function will return test versions of the application package in addition to the non-test versions.
 
 .PARAMETER Preview
-This is an optional switch parameter. If used, the function will include Preview Apps in its return. If not used, Preview Apps will be excluded.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+The Preview parameter is an optional switch parameter. When this switch is used, the function will return preview versions of the application package in addition to the non-preview versions.
 
 .EXAMPLE
-Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "AppName1" -BearerToken "1234567890"
-
-This example fetches available Business Central App packages from DevSuite1, filters by AppName1, excludes Test Apps and Preview Apps, and uses the BearerToken 1234567890 for authentication.
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1"
+This command retrieves the latest version of the "App1" application package from the "Suite1" DevSuite.
 
 .EXAMPLE
-Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "AppName1" -TestApp -Preview -BearerToken "1234567890"
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1" -TestApp
+This command retrieves the latest version of the "App1" application package, including test versions, from the "Suite1" DevSuite.
 
-This example fetches available Business Central App packages from DevSuite1, filters by AppName1, includes Test Apps and Preview Apps, and uses the BearerToken 1234567890 for authentication.
+.EXAMPLE
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1" -Preview
+This command retrieves the latest version of the "App1" application package, including preview versions, from the "Suite1" DevSuite.
 #>
 function Get-DevSuiteAvailableBCAppPackage {
     Param (
@@ -39,12 +38,10 @@ function Get-DevSuiteAvailableBCAppPackage {
         [Parameter(Mandatory = $false)]
         [Switch] $TestApp,
         [Parameter(Mandatory = $false)]
-        [Switch] $Preview,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Switch] $Preview       
     )
 
-    $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite -BearerToken $BearerToken   
+    $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
     $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
     if (-not $TestApp) {
         $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isTestApp -eq $false }

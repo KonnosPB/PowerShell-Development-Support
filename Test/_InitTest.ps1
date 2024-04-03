@@ -10,9 +10,9 @@ Import-Module $modulePath -Force -DisableNameChecking -ErrorAction SilentlyConti
 
 Get-PSSession | Remove-PSSession
 
-if (-not (Test-Path -Path $Global:Config.BearerTokenApplicationPath)){
-    throw "Environment variable '$($Global:Config.BearerTokenApplicationPath)' which contains the path to the bearer token helper application not set"
-}
-if (-not (Test-DevSuiteBearerToken -BearerToken $Global:DevSuiteBearerToken)){
-    Update-DevSuiteBearerToken -BearerTokenApplication $Global:Config.BearerTokenApplicationPath
-}
+# if (-not (Test-Path -Path $Global:Config.BearerTokenApplicationPath)){
+#     throw "Environment variable '$($Global:Config.BearerTokenApplicationPath)' which contains the path to the bearer token helper application not set"
+# }
+# if (-not (Test-DevSuiteBearerToken -BearerToken $Global:DevSuiteBearerToken)){
+#     Update-DevSuiteBearerToken -BearerTokenApplication $Global:Config.BearerTokenApplicationPath
+# }

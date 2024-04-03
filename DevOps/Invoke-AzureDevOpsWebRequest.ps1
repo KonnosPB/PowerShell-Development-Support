@@ -52,11 +52,11 @@ function Invoke-AzureDevOpsWebRequest {
     if ($Body) {
         $authHeaders.Add("Content-Type", $ContentType)
         Write-Host "$callingCommandFile : Invoke-DevSuiteWebRequest -Uri $Uri -Method $Method -Body $Body" -NoNewline  
-        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body  
+        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -SkipHttpErrorCheck 
     }
     else {
         Write-Host "$callingCommandFile : Invoke-DevSuiteWebRequest -Uri $Uri -Method $Method" -NoNewline  
-        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders 
+        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -SkipHttpErrorCheck 
     }        
     
     if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {

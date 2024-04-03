@@ -51,9 +51,6 @@ function Get-BusinessCentralArtifactUrl {
         [switch] $DoNotCheckPlatform
     )
 
-
-
-
     if ($Type -eq "OnPrem") {
         if ($Version -like '18.9*') {
             Write-Host -ForegroundColor Yellow 'On-premises build for 18.9 was replaced by 18.10.35134.0, using this version number instead'

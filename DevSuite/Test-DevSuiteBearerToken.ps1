@@ -20,15 +20,20 @@ function Test-DevSuiteBearerToken {
         [string] $BearerToken
     )   
     try {
-        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
-        $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET" -BearerToken $BearerToken -SkipErrorHandling
-        if ($result.StatusCode -ne 200) {
-            return false;
+        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"        
+        $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
+        $authHeaders.Add("Authorization", $bearerToken)           
+        $result = Invoke-WebRequest -Uri $uri -Method GET -Headers $authHeaders -SkipHttpErrorCheck     
+    
+        if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {            
+            return($true)
         }
-        $validJson = $result.Content | Test-Json -ErrorAction SilentlyContinue
-        return $validJson;        
+        else {
+            return $false
+        }        
     }
     catch {
+        Write-Debug $_
         return $false
     }    
 }
