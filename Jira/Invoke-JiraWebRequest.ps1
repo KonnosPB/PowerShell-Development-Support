@@ -49,7 +49,7 @@ function Invoke-JiraWebRequest {
         [Parameter(Mandatory = $false)]
         [switch] $SkipErrorHandling
     )
-    $authorizationContent = "$($Global:Config.JiraEMailAddress):$JiraApiToken"
+    $authorizationContent = $JiraApiToken
     $basicAuthorizationContent = "Basic $([System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($authorizationContent )))"
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $basicAuthorizationContent)

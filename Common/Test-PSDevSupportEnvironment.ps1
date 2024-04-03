@@ -30,13 +30,6 @@ function Test-PSDevSupportEnvironment {
     else {
         Write-Host "✅ '$($Global:Config.EnvVarJiraApiToken)' environment variable" 
     }
-    
-    if (-not $Global:Config.JiraEMailAddress) {
-        Write-Error "❌ Environment variable '$($Global:Config.JiraEMailAddress)' missing" 
-    }
-    else {
-        Write-Host "✅ '$($Global:Config.JiraEMailAddress)' environment variable" 
-    }
 
     $AzureDevOpsToken = [System.Environment]::GetEnvironmentVariable($($Global:Config.EnvVarAzureDevOpsToken), 'Machine')
     if (-not $AzureDevOpsToken) {
