@@ -1,16 +1,16 @@
 # Einführung
-KUMADevelopmentSupport ist ein Powershell Modul, das dir bei deiner Entwicklungsarbeit bei Kumavision im Kontext von Business Central hilft.
+PSDevelopmentSupport ist ein Powershell Modul, das dir bei deiner Entwicklungsarbeit bei Kumavision im Kontext von Business Central hilft.
 
 # Voraussetzungen
-- Du benötigst einen [Github](https://github.com/) Account
-- Du benötigst [PowerShell 7.4.1](https://github.com/PowerShell/PowerShell/releases/tag/v7.4.1)
+- Es wird ein [Github](https://github.com/) Account
+- Es wird [PowerShell 7.4.1](https://github.com/PowerShell/PowerShell/releases/tag/v7.4.1) benötigt.
   _Ich habe das Modul mit dieser Version entwickelt. Andere Versionen könnten auch funktionieren, aber ich kann das nicht garantieren._
 
 # Installation 
 
 1. Klone das GIT Repository
 ``` bash
-git clone https://github.com/KonnosPB/PSDevelopementSupport.git
+git clone https://github.com/KonnosPB/PSDevelopmentSupport.git
 ```
 
 2. Importiere das Modul

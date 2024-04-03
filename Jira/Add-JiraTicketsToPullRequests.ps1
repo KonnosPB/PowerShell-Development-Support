@@ -21,14 +21,16 @@ Add-JiraTicketsToPullRequests -AzureDevOpsPullRequests $pullRequests -JiraApiTok
 
 This example adds the Jira tickets with keys 'KEY-1' and 'KEY-2' to the respective Azure DevOps pull requests.
 #>
-function Add-JiraTicketsToPullRequests{
+function Add-JiraTicketsToPullRequests {
     Param (        
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $false)]
         [PSCustomObject[]] $AzureDevOpsPullRequests,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string] $JiraApiToken
     )
-
+    if (-not $AzureDevOpsPullRequests){
+        return
+    }
     foreach ($azureDevOpsPullRequest in $AzureDevOpsPullRequests) {
         #$jiraIssueId = $azureDevOpsPullRequest.fields."Custom.JiraIssueId"
         $jiraIssueKey = $azureDevOpsPullRequest.fields."Custom.JiraIssueKey"
