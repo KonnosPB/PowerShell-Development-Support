@@ -1,117 +1,95 @@
-﻿<#
-.SYNOPSIS
-This function creates a new environment in DevSuite.
-
-.DESCRIPTION
-The New-DevSuiteEnvironment function creates a new environment in DevSuite. It requires several mandatory parameters including project number, project description, project management, customer number, customer name, branch, department, cost center, lead developer, artifact URL, Azure DevOps, and Kuma target.
-
-.PARAMETER ProjectNo
-The number of the project. This parameter is mandatory.
-
-.PARAMETER ProjectDescription
-The description of the project. This parameter is mandatory.
-
-.PARAMETER ProjectManagement
-The management of the project. This parameter is mandatory.
-
-.PARAMETER CustomerNo
-The number of the customer. This parameter is mandatory.
-
-.PARAMETER CustomerName
-The name of the customer. This parameter is mandatory.
-
-.PARAMETER Branch
-The branch for the project. This parameter is mandatory.
-
-.PARAMETER Department
-The department for the project. This parameter is mandatory.
-
-.PARAMETER CostCenter
-The cost center for the project. This parameter is mandatory.
-
-.PARAMETER LeadDeveloper
-The lead developer for the project. This parameter is mandatory.
-
-.PARAMETER ArtifactUrl
-The URL for the artifact. This parameter is mandatory.
-
-.PARAMETER AzureDevOps
-The Azure DevOps for the project. This parameter is mandatory.
-
-.PARAMETER KumaTarget
-The Kuma target for the project. This parameter is mandatory.
-
-.PARAMETER TimeoutMinutes
-The timeout in minutes. This parameter is optional. If not provided, the function will default to 45 minutes.
-
-.EXAMPLE
-```PowerShell
-New-DevSuiteEnvironment -ProjectNo '123' -ProjectDescription 'This is a test project' -ProjectManagement 'John Doe' -CustomerNo '456' -CustomerName 'Test Customer' -Branch 'dev' -Department 'IT' -CostCenter '789' -LeadDeveloper 'Jane Doe' -ArtifactUrl 'http://artifacturl.com' -AzureDevOps 'http://devops.com' -KumaTarget 'test' -TimeoutMinutes 30
-```
-This example creates a new environment in DevSuite with the provided parameters and a timeout of 30 minutes.
-#>
-function New-DevSuiteEnvironment {
+﻿function New-DevSuiteEnvironment {
     Param (
         [Parameter(Mandatory = $true)]
-        [string] $ProjectNo,
+        [ValidateSet("Healtcare", "Medtech")]
+        [string] $Solution,
         [Parameter(Mandatory = $true)]
-        [string] $ProjectDescription,
+        [string] $Version,
         [Parameter(Mandatory = $true)]
-        [string] $ProjectManagement,
+        [string] $NewDevSuite,
         [Parameter(Mandatory = $true)]
-        [string] $CustomerNo,
+        [string] $MigrationDevSuite,
         [Parameter(Mandatory = $true)]
-        [string] $CustomerName,
-        [Parameter(Mandatory = $true)]
-        [string] $Branch,
-        [Parameter(Mandatory = $true)]
-        [string] $Department,        
-        [Parameter(Mandatory = $true)]
-        [string] $CostCenter,
-        [Parameter(Mandatory = $true)]
-        [string] $LeadDeveloper,
-        [Parameter(Mandatory = $true)]
-        [string] $ArtifactUrl,
-        [Parameter(Mandatory = $true)]
-        [string] $AzureDevOps,
-        [Parameter(Mandatory = $true)]
-        [string] $KumaTarget,
+        [string] $MigrationTenant,
+        [Parameter(Mandatory = $true)]        
+        [string] $LicensePath,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 45
+        [string[]] $Users = @("kuma", "kuma1", "kuma2", "kuma3", "kuma4", "kuma5"),
+        [Parameter(Mandatory = $false)]
+        [string[]] $ExternalApps = @("Quality Management", "KUMAVISION base", "KUMAVISION base"),
+        [Parameter(Mandatory = $false)]
+        [string[]] $ExternalPreviewApps = @(),
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipCreation,
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipMigration,
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipCronus
     )
 
-    $jsonObject = @{
-        "projectNumber"      = $ProjectNo
-        "projectDescription" = $ProjectDescription
-        "projectManager"     = $ProjectManagement
-        "leadDeveloper"      = $LeadDeveloper
-        "branch"             = $Branch
-        "customerName"       = $CustomerName
-        "customerNumber"     = $CustomerNo
-        "department"         = $Department
-        "costCenter"         = $CostCenter
-        "artifactUrl"        = $ArtifactUrl
-        "linkDevOps"         = $AzureDevOps
-        "linkKumaTarget"     = $KumaTarget
-    } | ConvertTo-Json
+    $script:ArtefactUrl = Get-BusinessCentralArtifactUrl -Country "de" -Version $version -Select Latest -Type Sandbox
+    if ($Solution = -eq "Medtech") {
+        $script:ProjectNo = $Global:Config.DevSuiteMedtecProjectNo
+        $script:AzureDevOps = $Global:Config.DevSuiteMedtecAzureDevOps
+        $script:KUMATarget = $Global:Config.DevSuiteMedtecKUMATarget
+    }
+    else {
+        $script:ProjectNo = $Global:Config.DevSuiteHealthcareProjectNo
+        $script:AzureDevOps = $Global:Config.DevSuiteHealthcareAzureDevOps
+        $script:KUMATarget = $Global:Config.DevSuiteHealthcareKUMATarget
+    }
 
-    $uri = Get-DevSuiteUri -Route 'vm'
-    Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
+    if (-not $SkipCreation.IsPresent) {
+        New-DevSuite `
+            -ProjectNo $script:ProjectNo `
+            -ProjectDescription $NewDevSuite `
+            -CustomerNo $Global:Config.DevSuiteCustomerNo `
+            -CustomerName $Global:Config.DevSuiteCustomerName `
+            -ProjectManagement $Global:Config.DevSuiteProjectManagement `
+            -Branch $Global:Config.DevSuiteBranch `
+            -Department $Global:Config.DevSuiteDepartment `
+            -CostCenter $Global:Config.DevSuiteCostCenter `
+            -LeadDeveloper $Global:Config.DevSuiteLeadDeveloper `
+            -ArtifactUrl $script:ArtefactUrl  `
+            -AzureDevOps $script:ProjectNo =  $script:AzureDevOps `
+            -KUMATarget $script:KUMATarget 
+    }
 
-    # Startzeit festlegen
-    $startTime = Get-Date
-
-    # Schleife, die bis zu 45 Minuten läuft
-    while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {    
-        $elapsedTime = (Get-Date) - $startTime
-        $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Host "Waiting $minutes minutes: " -NoNewline
-        if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription ) {            
-            $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription 
-            return $devSuite            
+    if (-not $SkipMigration.IsPresent) {
+        # Neue DevSuite object beschaffen        
+        $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
+        if (-not $newDevSuiteObj) {
+            throw "DevSuite '$NewDevSuite' konnte nicht erfolgreich angelegt werden."
         }    
-        Start-Sleep -Seconds 5
+
+        # Migrations DevSuite object beschaffen
+        $migrationDevSuite = Get-DevSuiteEnvironment -NameOrDescription $MigrationDevSuite
+        if (-not $migrationDevSuite) {
+            throw "DevSuite '$MigrationDevSuite' nicht gefunden."
+        }     
+
+        Invoke-DevSuiteMigrate -SourceResourceGroup $migrationDevSuite.resourceGroup `
+            -SourceDevSuite $migrationDevSuite.name `
+            -SourceTenant $testTenantName `
+            -DestinationResourceGroup $newDevSuite.resourceGroup `
+            -DestinationDevSuite $newDevSuiteDescription `
+            -DestinationTenant $testTenantName
+    }
+
+    # Installation App in test-Tenant
+    Install-DevSuiteBCAppPackages `
+        -AppNames $ExternalApps `
+        -Preview $ExternalPreviewApps `
+        -Tenant $MigrationTenant `
+        -DevSuite $NewDevSuite
+
+    foreach ($User in $Users){
+        New-DevSuiteUser -UserName $User -DevSuite $NewDevSuite -Tenant $MigrationTenant -ErrorAction SilentlyContinue
+    }
+
+    # cronusag tenant anlegen
+    if (-not $SkipCronus){
+        Invoke-DevSuiteCopy -DevSuite $NewDevSuite -SourceTenant "default" -DestinationTenant "cronusag"
     }    
-    throw "New-DevSuiteEnvironment timeout"
 }
 Export-ModuleMember -Function  New-DevSuiteEnvironment

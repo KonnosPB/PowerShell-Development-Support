@@ -27,9 +27,12 @@ function New-DevSuiteUser {
         [string] $Tenant,
         [Parameter(Mandatory = $true)]
         [string] $UserName
-    )      
+    )  
+    
+    Write-Host "Adding user '$UserName' into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
 
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/user/$UserName"
+    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/user/$UserName"
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' 
 }
 

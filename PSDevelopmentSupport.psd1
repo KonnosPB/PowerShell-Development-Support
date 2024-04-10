@@ -70,10 +70,10 @@
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Get-DevSuiteUri', 'Invoke-DevSuiteWebRequest', 'Test-DevSuiteBearerToken', 
-    'Update-DevSuiteBearerToken', 'New-DevSuiteEnvironment', 'Test-DevSuiteEnvironment', 
+    'Update-DevSuiteBearerToken', 'New-DevSuiteEnvironment', 'New-DevSuite', 'Test-DevSuiteEnvironment', 
     'Get-DevSuiteEnvironment', 'Get-DevSuiteEnvironments', 'Wait-DevSuiteTenantsReady', 
     'Test-DevSuiteTenantsMounted', 'Get-DevSuiteTenants', 'Get-DevSuiteTenant', 
-    'Invoke-DevSuiteMigrate', 'Wait-DevSuiteTenantsReady', 'Install-DevSuiteBCAppPackage', 
+    'Invoke-DevSuiteMigrate', 'Wait-DevSuiteTenantsReady', 'Install-DevSuiteBCAppPackages', 
     'Get-DevSuiteAvailableBCAppPackages', 'Get-DevSuiteAvailableBCAppPackage', 'Get-DevSuiteAvailableBCAppPackage', 
     'Get-DevSuitePublishedBCAppPackages', 'Import-DevSuiteLicense', 'Invoke-DevSuiteCopy', 
     'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', 
@@ -98,11 +98,11 @@
     
     # List of all files packaged with this module
     FileList             = @("InitializeModule.ps1", "DevSuite\Get-DevSuiteUri.ps1", "DevSuite\Invoke-DevSuiteWebRequest.ps1", 
-        "DevSuite\Test-DevSuiteBearerToken.ps1", "DevSuite\Update-DevSuiteBearerToken.ps1", 
+        "DevSuite\Test-DevSuiteBearerToken.ps1", "DevSuite\Update-DevSuiteBearerToken.ps1",  "DevSuite\New-DevSuite.ps1",
         "DevSuite\New-DevSuiteEnvironment.ps1", "DevSuite\Test-DevSuiteEnvironment.ps1", 
         "DevSuite\Get-DevSuiteEnvironment.ps1", "DevSuite\Get-DevSuiteEnvironments.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", 
         "DevSuite\Test-DevSuiteTenantsMounted.ps1", "DevSuite\Get-DevSuiteTenants.ps1", "DevSuite\Get-DevSuiteTenant.ps1", 
-        "DevSuite\Invoke-DevSuiteMigrate.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", "DevSuite\Install-DevSuiteBCAppPackage.ps1", 
+        "DevSuite\Invoke-DevSuiteMigrate.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", "DevSuite\Install-DevSuiteBCAppPackages.ps1", 
         "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1", "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1", "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1", 
         "DevSuite\Import-DevSuiteLicense.ps1", "DevSuite\Invoke-DevSuiteCopy.ps1", "DevSuite\New-DevSuiteUser.ps1", "DevSuite\Import-DevSuiteTestToolkit.ps1", 
         "DevOps\Get-AzureDevOpsUri.ps1", "DevOps\Invoke-AzureDevOpsWebRequest.ps1", "DevOps\Get-AzureDevOpsRepositories.ps1", 

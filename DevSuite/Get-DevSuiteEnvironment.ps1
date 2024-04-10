@@ -22,11 +22,14 @@ function Get-DevSuiteEnvironment {
         [Parameter(Mandatory = $true)]
         [string] $NameOrDescription
     )
+
     try {
         $devSuite = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1
         if ($devSuite) {
             return $devSuite
         }
+        
+        Write-Debug "Getting devsuite info of '$NameOrDescription'" -ForegroundColor Gray
         $Global:DevSuiteEnvironments = Get-DevSuiteEnvironments
         $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1
         if ($devSuiteObj) {

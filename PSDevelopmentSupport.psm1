@@ -28,7 +28,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteTenant.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Invoke-DevSuiteMigrate.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Wait-DevSuiteTenantsReady.ps1")
-. (Join-Path $PSScriptRoot "DevSuite\Install-DevSuiteBCAppPackage.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Install-DevSuiteBCAppPackages.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1")
@@ -37,6 +37,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\New-DevSuiteUser.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Import-DevSuiteTestToolkit.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteBearerToken.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\New-DevSuite.ps1")
 
 # DevOps
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsUri.ps1")

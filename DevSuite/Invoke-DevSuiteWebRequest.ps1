@@ -49,27 +49,27 @@ function Invoke-DevSuiteWebRequest {
 
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $bearerToken)
+    $authHeaders.Add("Connection", 'keep-alive')
 
     $callingCommandFile = Split-Path $MyInvocation.PSCommandPath -Leaf | ForEach-Object { $_ -replace '\.[^.]+$', '' }
 
     if ($Body) {
         $authHeaders.Add("Content-Type", $ContentType)
-        Write-Host "$callingCommandFile -Uri $Uri -Method $Method -Body $Body" -NoNewline  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -SkipHttpErrorCheck 
+        Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -SkipHttpErrorCheck
     }
     else {
-        Write-Host "$callingCommandFile -Uri $Uri -Method $Method" -NoNewline  
+        Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  
         $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -SkipHttpErrorCheck 
     }      
     
-    if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {
-        Write-Host " ✅"
+    if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {        
         return($script:result);
     }
     else {
-        Write-Host " ❌"
         if (!$SkipErrorHandling) {
-            throw "$($script:result.StatusCode) $($script:result.StatusDescription)" 
+            $errorMessage = "Invoke-DevSuiteWebRequest failed with status $($script:result.StatusCode) $($script:result.StatusDescription)"
+            throw $errorMessage  
         }
     }
 }

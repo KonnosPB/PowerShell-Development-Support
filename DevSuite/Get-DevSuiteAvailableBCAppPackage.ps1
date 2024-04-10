@@ -40,6 +40,7 @@ function Get-DevSuiteAvailableBCAppPackage {
         [Parameter(Mandatory = $false)]
         [Switch] $Preview       
     )
+    Write-Debug "Getting app package info of $AppName from devsuite '$DevSuite'" -ForegroundColor Gray
 
     $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
     $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
@@ -52,6 +53,7 @@ function Get-DevSuiteAvailableBCAppPackage {
     }
 
     $selectedApp = $selectedAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1   
+    Write-Debug " ✅"
     return  $selectedApp
 }
 

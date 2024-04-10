@@ -49,6 +49,8 @@ function Invoke-DevSuiteMigrate {
         [int] $TimeoutMinutes = 45
     )   
 
+    Write-Host "Migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationTenant' in devsuite '$DestinationDevSuite'" -ForegroundColor Green
+
     $sourceTenantObj = Get-DevSuiteTenant -DevSuite $SourceDevSuite -Tenant $SourceTenant
     if (-not $sourceTenantObj) {
         throw "Source tenant $SourceTenant doesn't exist in $SourceDevSuite"
@@ -63,8 +65,10 @@ function Invoke-DevSuiteMigrate {
         "DestinationTenantName"    = $DestinationTenant
     } | ConvertTo-Json
 
-    $uri = Get-DevSuiteUri -Route "migrateTenant/async"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject 
+    $uri = Get-DevSuiteUri -Route "migrateTenant"    
+    #Start-Job -ScriptBlock { 
+        Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject
+    #} | Out-Null
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -73,9 +77,10 @@ function Invoke-DevSuiteMigrate {
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {   
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Host "Waiting $minutes minutes: " -NoNewline
+        Write-Progress -Activity "Waiting for $minutes minutes" -Status "Running" -PercentComplete ($minutes / $TimeoutMinutes * 100)
         $tenant = Get-DevSuiteTenant -DevSuite $DestinationDevSuite -Tenant $DestinationTenant 
-        if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {          
+        if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {  
+            Write-Host "Tenant '$DestinationDevSuite'copied and mounted successfully into '$DestinationTenant' from devsuite '$SourceDevSuite' tenant '$SourceTenant'" -ForegroundColor Green                
             return $true            
         }    
         Start-Sleep -Seconds 5

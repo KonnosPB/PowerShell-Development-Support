@@ -58,11 +58,11 @@ function Invoke-JiraWebRequest {
 
     if ($Body) {
         $authHeaders.Add("Content-Type", $ContentType)
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body" -NoNewline  
+        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body  
     }
     else {
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method" -NoNewline  
+        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders 
     }  
     

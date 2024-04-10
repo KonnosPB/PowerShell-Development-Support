@@ -34,12 +34,15 @@ function Invoke-DevSuiteCopy {
         [int] $TimeoutMinutes = 15
     )   
 
+    Write-Host "Copying tenant '$SourceTenant' into '$DestinationTenant' in devsuite '$DevSuite'" -ForegroundColor Green
+
     $sourceTenantObj = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $SourceTenant
     if (-not $sourceTenantObj) {
         throw "Source tenant $SourceTenant doesn't exist in $DevSuite"
     } 
 
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$SourceTenant/copyTo/$DestinationTenant"
+    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$SourceTenant/copyTo/$DestinationTenant"
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 
     # Startzeit festlegen
@@ -49,14 +52,15 @@ function Invoke-DevSuiteCopy {
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {  
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Host "Waiting $minutes minutes: " -NoNewline 
+        Write-Progress -Activity "Waiting for $minutes minutes" -Status "Running" -PercentComplete ($minutes / $TimeoutMinutes * 100)
         $tenant = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $DestinationTenant
-        if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {          
-            return $true            
+        if ($tenant -and (@('Mounted', 'Operational') -contains $tenant.Status)) {  
+            Write-Host "Tenant $DestinationTenant successfully copied and mounted" -ForegroundColor Green        
+            return $tenant           
         }    
         Start-Sleep -Seconds 5
     }    
-    return $false
+    return $null
 }
 
 Export-ModuleMember -Function Invoke-DevSuiteCopy

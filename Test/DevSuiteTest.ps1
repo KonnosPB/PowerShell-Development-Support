@@ -52,7 +52,7 @@ Describe "DevSuite " {
             $newTenantObj = Get-DevSuiteTenant -DevSuite $newDevSuite.name -Tenant $newTenant -BearerToken $Global:DevSuiteBearerToken
             $newTenantObj | Should -Not -BeNullOrEmpty   
 
-            # $publishedApp = Install-DevSuiteBCAppPackage -DevSuite $newDevSuite.name `
+            # $publishedApp = Install-DevSuiteBCAppPackages -DevSuite $newDevSuite.name `
             #     -Tenant $newTenant `
             #     -AppName "KUMAVISION base" `
             #     -BearerToken $Global:DevSuiteBearerToken

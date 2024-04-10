@@ -38,8 +38,9 @@ function Import-DevSuiteTestToolkit {
         [Parameter(Mandatory = $false)]
         [bool] $IncludeTestFrameworkOnly = $false
     )   
-
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/importtesttoolkit" -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
+    Write-Host "Importing test tool kit into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
+    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/importtesttoolkit" -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 }
 

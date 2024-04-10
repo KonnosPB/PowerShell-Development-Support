@@ -30,7 +30,7 @@ function Get-DevSuiteUri {
     $uri += "?code=$($Global:Config.DevSuiteHost)"     
     if ($Parameter) {
         $uri += "&$Parameter"
-    }
+    }    
     return($uri)
 }
 Export-ModuleMember -Function Get-DevSuiteUri

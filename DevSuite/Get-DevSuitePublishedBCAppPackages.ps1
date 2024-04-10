@@ -23,7 +23,10 @@ function Get-DevSuitePublishedBCAppPackages {
         [Parameter(Mandatory = $true)]
         [string] $Tenant
     )    
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/appInfo"
+    Write-Debug "Getting published app app packages infos from devsuite '$DevSuite'" -ForegroundColor Green
+
+    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/appInfo"
     $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
     $appPackages = $response.Content | ConvertFrom-Json
     return $appPackages

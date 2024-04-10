@@ -26,6 +26,8 @@ function Get-DevSuiteTenants {
         [Parameter(Mandatory = $true)]
         [string] $DevSuite
     )
+
+    Write-Debug "Getting all tenant infos from devsuite '$DevSuite'" -ForegroundColor Gray
     $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
     if (-not $devSuiteObj) {
         return $null
