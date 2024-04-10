@@ -106,7 +106,8 @@ function New-DevSuite {
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {    
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "Running" -PercentComplete ($minutes / $TimeoutMinutes * 100)
+        $percentComplete = ($minutes / $TimeoutMinutes * 100)
+        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
         if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription ) {   
             Write-Host "Devsuite '$ProjectDescription' created. Waiting now for tenants" -ForegroundColor Green         
             $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription 

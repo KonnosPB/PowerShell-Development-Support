@@ -29,7 +29,7 @@ function Get-DevSuiteTenant {
         [Parameter(Mandatory = $true)]
         [string] $Tenant
     )
-    Write-Debug "Getting tenant info from devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Gray
+    Write-Debug "Getting tenant info from devsuite '$DevSuite' tenant '$Tenant'" 
     $tenants = Get-DevSuiteTenants -DevSuite $DevSuite
     $tenantObj = $tenants | Where-Object { $_.name -eq $Tenant } | Select-Object -First 1    
     return $tenantObj

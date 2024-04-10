@@ -18,7 +18,7 @@ This command retrieves the available BC app packages for the DevSuite named "Dev
         [Parameter(Mandatory = $true)]
         [string] $DevSuite
     )
-    Write-Debug "Getting all app packages infos from devsuite '$DevSuite'" -ForegroundColor Gray
+    Write-Debug "Getting all app packages infos from devsuite '$DevSuite'"
 
     $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/bcpackages"

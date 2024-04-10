@@ -14,7 +14,7 @@ This example calls the function without any parameters. It returns a JSON object
 
 #>
 function Get-DevSuiteEnvironments {
-    Write-Debug "Getting all devsuite infos" -ForegroundColor Gray
+    Write-Debug "Getting all devsuite infos" 
     try {
         $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
         $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET" -SkipErrorHandling

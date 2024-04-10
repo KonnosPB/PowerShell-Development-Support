@@ -1,7 +1,7 @@
 function New-ReleaseOverview {  
     Param (        
         [Parameter(Mandatory = $true)]
-        [ValidateSet("healthcare", "medtec")]
+        [ValidateSet("Healthcare", "Medtec")]
         [string] $Project,       
         [Parameter(Mandatory = $true)]        
         [string] $JiraSolutionVersion,       
@@ -23,7 +23,7 @@ function New-ReleaseOverview {
 
     $jiraProjectName = $Global:Config.JiraHealthcareProject
     $azureDevOpsProjectName = $Global:Config.AzureDevOpsHealthcareProject
-    if ($Project -eq "medtec") {
+    if ($Project -eq "Medtec") {
         $azureDevOpsProjectName = $Global:Config.AzureDevOpsMedtecProject
         $jiraProjectName = $Global:Config.JiraMedtecProject
     }

@@ -14,7 +14,7 @@ This is a mandatory parameter that specifies the Tenant in which the App package
 .PARAMETER AppNames
 This is a mandatory parameter that specifies the names of the Apps to be installed.
 
-.PARAMETER PreviewAppNames
+.PARAMETER InstallPreviewApps
 This is an optional switch parameter. If specified, the function will consider the App package as a Preview.
 
 .PARAMETER TimeoutMinutes
@@ -32,60 +32,77 @@ function Install-DevSuiteBCAppPackages {
         [Parameter(Mandatory = $true)]
         [string] $Tenant,
         [Parameter(Mandatory = $false)]
-        [string[]] $AppNames = @(),
+        [string[]] $InstallApps = @(),
         [Parameter(Mandatory = $false)]
-        [string[]] $PreviewAppNames = @(),
+        [string[]] $InstallPreviewApps = @(),
         [Parameter(Mandatory = $false)]
         [string] $TimeoutMinutes = 5  
     )   
     
-    Write-Host "Installing app packages ($([string]::Join(', ' ,$AppNames))) and preview apps ($([string]::Join(', ', $PreviewAppNames))) into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
+    Write-Host "Installing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
 
     $objs = @()
 
+    $tenant = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $Tenant
+    if (-not $tenant){
+        throw "Not tenant '$Tenant' found in devsuite '$DevSuite'"
+    }
+
     $selectedAppPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
-    if ( $AppNames) {
-        foreach ($AppName in $AppNames) {
+    if ( $InstallApps) {
+        foreach ($AppName in $InstallApps) {
             $selectedNormalAppPackages = $selectedAppPackages | Where-Object { $_.name -eq $AppName -and $_.isPreview -eq $false }       
             $selectedApp = $selectedNormalAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1  
-            $versionParts = $selectedApp.appVersion.Split('.')[0..2]
-            $versionFirstThree = [string]::Join('.', $versionParts)
-            $obj = @{
-                "AppId"             = $selectedApp.appId   # $selectedApp.uPackName                
-                "AppRuntimeVersion" = $selectedApp.uPackGroup
-                "AppVersion"        = $versionFirstThree  # $selectedApp.uPackVersion
-                "ProcessingId"      = [guid]::NewGuid().ToString()
-                "Task"              = "install"
-            }         
-            $objs += $obj    
+            if ($selectedApp) {
+                $versionParts = $selectedApp.appVersion.Split('.')[0..2]
+                $versionFirstThree = [string]::Join('.', $versionParts)
+                $obj = @{
+                    "AppId"             = $selectedApp.appId   # $selectedApp.uPackName                
+                    "AppRuntimeVersion" = $selectedApp.uPackGroup
+                    "AppVersion"        = $versionFirstThree  # $selectedApp.uPackVersion
+                    "ProcessingId"      = [guid]::NewGuid().ToString()
+                    "Task"              = "install"
+                }         
+                $objs += $obj    
+            }
+            else {
+                throw "'$AppName' not found or avaivalable on '$DevSuite'"
+            }
         }    
     }
-    if ( $PreviewAppNames) {
-        foreach ($AppName in $PreviewAppNames) {
+    if ( $InstallPreviewApps) {
+        foreach ($AppName in $InstallPreviewApps) {
             $selectedAllAppPackages = $selectedAppPackages | Where-Object { $_.name -eq $AppName }  # Inclusive isPreview
             #$selectedApp = $selectedAllAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1   
-            $selectedApp = $selectedAllAppPackages | Sort-Object { [Version] } | Select-Object -Last 1          
-            $versionParts = $selectedApp.appVersion.Split('.')[0..2]
-            $versionFirstThree = [string]::Join('.', $versionParts)
-            if ($selectedApp.isPreview){
-                $versionFirstThree += '-dev'
+            if ($selectedApp) {
+                $selectedApp = $selectedAllAppPackages | Sort-Object { [Version] } | Select-Object -Last 1          
+                $versionParts = $selectedApp.appVersion.Split('.')[0..2]
+                $versionFirstThree = [string]::Join('.', $versionParts)
+                if ($selectedApp.isPreview) {
+                    $versionFirstThree += '-dev'
+                }
+                $obj = @{
+                    "AppId"             = $selectedApp.appId   # $selectedApp.uPackName                
+                    "AppRuntimeVersion" = $selectedApp.uPackGroup
+                    "AppVersion"        = $versionFirstThree  # $selectedApp.uPackVersion
+                    "ProcessingId"      = [guid]::NewGuid().ToString()
+                    "Task"              = "install"
+                }         
+                $objs += $obj    
             }
-            $obj = @{
-                "AppId"             = $selectedApp.appId   # $selectedApp.uPackName                
-                "AppRuntimeVersion" = $selectedApp.uPackGroup
-                "AppVersion"        = $versionFirstThree  # $selectedApp.uPackVersion
-                "ProcessingId"      = [guid]::NewGuid().ToString()
-                "Task"              = "install"
-            }         
-            $objs += $obj    
-        }    
+            else {
+                throw "'$AppName' not found or avaivalable on '$DevSuite'"
+            }
+        }       
     }
     
     $body = ConvertTo-Json -InputObject $objs
     $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/bcapps"
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'PATCH' -Body $body -$SkipErrorHandling
-    
+    Start-Job -ScriptBlock {
+        Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling
+    }| Out-Null
+        
     # Startzeit festlegen
     $startTime = Get-Date
 
@@ -93,7 +110,8 @@ function Install-DevSuiteBCAppPackages {
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) { 
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "Running" -PercentComplete ($minutes / $TimeoutMinutes * 100)
+        $percentComplete = ($minutes / $TimeoutMinutes * 100)
+        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
         $publishedApps = Get-DevSuitePublishedBCAppPackages -DevSuite $DevSuite -Tenant $Tenant
         $publishedApp = $publishedApps | Where-Object ({ $_.appId -eq $selectedApp.appId })
         if ($publishedApp) {

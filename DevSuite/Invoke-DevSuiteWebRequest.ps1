@@ -39,8 +39,8 @@ function Invoke-DevSuiteWebRequest {
         [string] $Method,      
         [Parameter(Mandatory = $false)]
         [object] $Body,
-        [Parameter(Mandatory = $false)]
-        [string] $ContentType = 'application/json',
+        [Parameter(Mandatory = $false)]       
+        [string] $ContentType = "application/json",
         [Parameter(Mandatory = $false)]
         [switch] $SkipErrorHandling        
     )
@@ -50,13 +50,16 @@ function Invoke-DevSuiteWebRequest {
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $bearerToken)
     $authHeaders.Add("Connection", 'keep-alive')
+    if (-not $ContentType){
+        $ContentType = "application/json"
+    }
 
     $callingCommandFile = Split-Path $MyInvocation.PSCommandPath -Leaf | ForEach-Object { $_ -replace '\.[^.]+$', '' }
 
     if ($Body) {
-        $authHeaders.Add("Content-Type", $ContentType)
+        #$authHeaders.Add("Content-Type", $ContentType)
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -SkipHttpErrorCheck
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType -SkipHttpErrorCheck
     }
     else {
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  

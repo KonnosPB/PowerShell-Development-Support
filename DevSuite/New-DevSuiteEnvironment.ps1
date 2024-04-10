@@ -1,24 +1,24 @@
 ﻿function New-DevSuiteEnvironment {
     Param (
         [Parameter(Mandatory = $true)]
-        [ValidateSet("Healtcare", "Medtech")]
+        [ValidateSet("Healthcare", "Medtec")]
         [string] $Solution,
         [Parameter(Mandatory = $true)]
         [string] $Version,
         [Parameter(Mandatory = $true)]
         [string] $NewDevSuite,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [string] $MigrationDevSuite,
         [Parameter(Mandatory = $true)]
-        [string] $MigrationTenant,
-        [Parameter(Mandatory = $true)]        
+        [string] $Tenant,
+        [Parameter(Mandatory = $false)]        
         [string] $LicensePath,
         [Parameter(Mandatory = $false)]
         [string[]] $Users = @("kuma", "kuma1", "kuma2", "kuma3", "kuma4", "kuma5"),
         [Parameter(Mandatory = $false)]
-        [string[]] $ExternalApps = @("Quality Management", "KUMAVISION base", "KUMAVISION base"),
+        [string[]] $InstallApps = @("Quality Management", "KUMAVISION base", "KUMAVISION base DACH"),
         [Parameter(Mandatory = $false)]
-        [string[]] $ExternalPreviewApps = @(),
+        [string[]] $InstallPreviewApps = @(),
         [Parameter(Mandatory = $false)]
         [switch] $SkipCreation,
         [Parameter(Mandatory = $false)]
@@ -26,9 +26,25 @@
         [Parameter(Mandatory = $false)]
         [switch] $SkipCronus
     )
+    Write-Host "## Process started ##" -ForegroundColor Green
+
+    if (-not $SkipMigration.IsPresent) {
+        if (-not $MigrationDevSuite) {
+            throw "Parameter 'MigrationDevSuite' is required when 'SkipMigration' is not present."
+        }      
+        if (-not $LicensePath) {
+            throw "Parameter 'LicensePath' is required when 'SkipMigration' is not present."
+        }  
+    }
+
+    if (-not $SkipCreation.IsPresent) {         
+        if (-not $LicensePath) {
+            throw "Parameter 'LicensePath' is required when 'SkipCreation' is not present."
+        }  
+    }
 
     $script:ArtefactUrl = Get-BusinessCentralArtifactUrl -Country "de" -Version $version -Select Latest -Type Sandbox
-    if ($Solution = -eq "Medtech") {
+    if ($Solution -eq "Medtec") {
         $script:ProjectNo = $Global:Config.DevSuiteMedtecProjectNo
         $script:AzureDevOps = $Global:Config.DevSuiteMedtecAzureDevOps
         $script:KUMATarget = $Global:Config.DevSuiteMedtecKUMATarget
@@ -78,18 +94,20 @@
 
     # Installation App in test-Tenant
     Install-DevSuiteBCAppPackages `
-        -AppNames $ExternalApps `
-        -Preview $ExternalPreviewApps `
-        -Tenant $MigrationTenant `
+        -InstallApps $InstallApps `
+        -InstallPreviewApps $InstallPreviewApps `
+        -Tenant $Tenant `
         -DevSuite $NewDevSuite
 
     foreach ($User in $Users){
-        New-DevSuiteUser -UserName $User -DevSuite $NewDevSuite -Tenant $MigrationTenant -ErrorAction SilentlyContinue
+        New-DevSuiteUser -UserName $User -DevSuite $NewDevSuite -Tenant $Tenant -ErrorAction SilentlyContinue
     }
 
     # cronusag tenant anlegen
     if (-not $SkipCronus){
         Invoke-DevSuiteCopy -DevSuite $NewDevSuite -SourceTenant "default" -DestinationTenant "cronusag"
-    }    
+    } 
+    
+    Write-Host "## Process completed ##" -ForegroundColor Green
 }
 Export-ModuleMember -Function  New-DevSuiteEnvironment

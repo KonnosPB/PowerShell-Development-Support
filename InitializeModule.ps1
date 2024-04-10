@@ -1,5 +1,5 @@
 $configPath = Join-Path $PSScriptRoot "PSDevelopmentSupport.config.json"
-if (($Global:ConfigPath)-and (Test-Path $Global:ConfigPath)){
+if (($Global:ConfigPath) -and (Test-Path $Global:ConfigPath)){
     $configPath = $Global:ConfigPath
 }
 $Global:Config = Get-Content $configPath | ConvertFrom-Json
@@ -17,4 +17,6 @@ $Global:BearerTokenApplicationPath =  [System.Environment]::GetEnvironmentVariab
 if (-not $Global:BearerTokenApplicationPath){
     throw "User environment variable '$($Global:Config.BearerTokenApplicationPath)' not set."
 }
+
+
 $Global:DevSuiteEnvironments = @() 

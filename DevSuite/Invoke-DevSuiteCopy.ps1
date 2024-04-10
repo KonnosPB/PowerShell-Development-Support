@@ -43,7 +43,9 @@ function Invoke-DevSuiteCopy {
 
     $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$SourceTenant/copyTo/$DestinationTenant"
+    Start-Job -ScriptBlock {
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
+    }|Out-Null
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -52,7 +54,8 @@ function Invoke-DevSuiteCopy {
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {  
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "Running" -PercentComplete ($minutes / $TimeoutMinutes * 100)
+        $percentComplete = ($minutes / $TimeoutMinutes * 100)
+        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
         $tenant = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $DestinationTenant
         if ($tenant -and (@('Mounted', 'Operational') -contains $tenant.Status)) {  
             Write-Host "Tenant $DestinationTenant successfully copied and mounted" -ForegroundColor Green        
