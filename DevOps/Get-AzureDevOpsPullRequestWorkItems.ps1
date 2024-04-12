@@ -43,7 +43,7 @@ function Get-AzureDevOpsPullRequestWorkItems {
     if (-not $AzureDevOpsPullRequests){
         return $result
     }
-    foreach ($pullRequest in $AzureDevOpsPullRequest) {        
+    foreach ($pullRequest in $AzureDevOpsPullRequests) {        
         $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/repositories/$($pullRequest.repository)/pullRequests/$($pullRequest.pullRequestId)/workitems"         
         $response = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken        
         $jWorkItems = $response.Content | ConvertFrom-Json

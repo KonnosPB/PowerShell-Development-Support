@@ -58,16 +58,15 @@ function Invoke-JiraWebRequest {
 
     if ($Body) {
         $authHeaders.Add("Content-Type", $ContentType)
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body"  
+        Write-Debug "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body  
     }
     else {
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method"  
+        Write-Debug "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders 
     }  
     
-    if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {
-        Write-Host " ✅"
+    if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {        
         return($result);
     }
     else {

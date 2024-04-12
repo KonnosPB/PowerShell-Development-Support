@@ -45,7 +45,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsRepositories.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1")
-. (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsWorkItemsFromJiraTickets.ps1")
+. (Join-Path $PSScriptRoot "DevOps\Add-AzureDevOpsWorkItemsToJiraTickets.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Test-AzureDevOpsWorkItemMergedIntoDevelop.ps1")
 
 # Jira

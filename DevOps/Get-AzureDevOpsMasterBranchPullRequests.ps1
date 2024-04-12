@@ -41,7 +41,7 @@ function Get-AzureDevOpsMasterBranchPullRequests {
             $pullRequests = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken              
             $jContent = $pullRequests.Content | ConvertFrom-Json
             foreach ($pullRequest in $jContent.value) {
-                $pullRequest.repository = $repository
+                $pullRequest.repository = $AzureDevOpsRepository
                 $result += $pullRequest                
             }
         }

@@ -21,34 +21,38 @@ function New-ReleaseOverview {
         $AzureDevOpsToken = $Global:AzureDevopsToken
     }
 
-    $jiraProjectName = $Global:Config.JiraHealthcareProject
-    $azureDevOpsProjectName = $Global:Config.AzureDevOpsHealthcareProject
+    $jProjectName = $Global:Config.JiraHealthcareProject
+    $dProjectName = $Global:Config.AzureDevOpsHealthcareProject
     if ($Project -eq "Medtec") {
-        $azureDevOpsProjectName = $Global:Config.AzureDevOpsMedtecProject
-        $jiraProjectName = $Global:Config.JiraMedtecProject
+        $dProjectName = $Global:Config.AzureDevOpsMedtecProject
+        $jProjectName = $Global:Config.JiraMedtecProject
     }
     
-    $azureDevOpsRepositories = Get-AzureDevOpsRepositories -AzureDevOpsProject $azureDevOpsProjectName `
+    $repositories = Get-AzureDevOpsRepositories -AzureDevOpsProject $dProjectName `
         -AzureDevOpsToken $AzureDevOpsToken
 
-    $masterBranchPullRequests = Get-AzureDevOpsMasterBranchPullRequests -AzureDevOpsProject $azureDevOpsProjectName `
-        -AzureDevOpsRepositories $azureDevOpsRepositories `
-        -AzureDevOpsToken $AzureDevOpsToken 
+    $pullRequests = Get-AzureDevOpsMasterBranchPullRequests -AzureDevOpsProject $dProjectName `
+        -AzureDevOpsRepositories $repositories `
+        -AzureDevOpsToken $AzureDevOpsToken
     
-    $masterBranchPullRequestsWorkItems = Get-AzureDevOpsPullRequestWorkItems -AzureDevOpsProject $azureDevOpsProjectName `
-        -AzureDevOpsPullRequests $masterBranchPullRequests  `
+    $workItems = Get-AzureDevOpsPullRequestWorkItems -AzureDevOpsProject $dProjectName `
+        -AzureDevOpsPullRequests $pullRequests  `
         -AzureDevOpsToken $AzureDevOpsToken 
 
-    Add-JiraTicketsToPullRequests -AzureDevOpsPullRequests $masterBranchPullRequests `
+    Add-JiraTicketsToPullRequests -AzureDevOpsPullRequestWorkItems $workItems `
         -JiraApiToken $JiraApiToken
 
-    $jiraTickets = Get-JiraTicketsFromSolutionVersion -JiraProject $jiraProjectName `
+    $jiraTickets = Get-JiraTicketsFromSolutionVersion -JiraProject $jProjectName `
         -Version $JiraSolutionVersion `
         -JiraApiToken $JiraApiToken
 
-    New-ReleaseExcelWorksheet -AzureDevOpsProject $azureDevOpsProjectName `
+    Test-AzureDevOpsWorkItemMergedIntoDevelop  -AzureDevOpsProject $dProjectName `
+        -AzureDevOpsPullRequestWorkItems $workItems `
+        -AzureDevOpsToken $AzureDevOpsToken 
+
+    New-ReleaseExcelWorksheet -AzureDevOpsProject $dProjectName `
         -JiraSolutionVersion $JiraSolutionVersion `
-        -AzureDevOpsPullRequestWorkItems $masterBranchPullRequestsWorkItems `
+        -AzureDevOpsPullRequestWorkItems $workItems `
         -JiraTickets $jiraTickets `
 
 }
