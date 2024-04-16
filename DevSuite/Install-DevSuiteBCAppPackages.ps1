@@ -43,8 +43,8 @@ function Install-DevSuiteBCAppPackages {
 
     $objs = @()
 
-    $tenant = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $Tenant
-    if (-not $tenant){
+    $tenantObj = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $Tenant
+    if (-not $tenantObj){
         throw "Not tenant '$Tenant' found in devsuite '$DevSuite'"
     }
 
