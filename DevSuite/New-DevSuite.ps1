@@ -77,8 +77,15 @@ function New-DevSuite {
         [Parameter(Mandatory = $true)]
         [string] $KumaTarget,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 60
+        [int] $TimeoutMinutes = 120
     )
+    #Check if devsuite already exist
+    $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription
+    if ($newDevSuiteObj){
+        Write-Host "DevSuite '$ProjectManagement' already exist. Skip creating a new one"    
+        return $newDevSuiteObj
+    }
+         
     Write-Host "Creating new devsuite '$ProjectDescription' with artifact url '$artifactUrl'" -ForegroundColor Green
 
     $jsonObject = @{
@@ -97,7 +104,9 @@ function New-DevSuite {
     } | ConvertTo-Json
 
     $uri = Get-DevSuiteUri -Route 'vm'
-    Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
+    #Start-Job -ScriptBlock {
+        Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
+    #} | Out-Null
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -107,17 +116,16 @@ function New-DevSuite {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
+        Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
         if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription ) {   
-            Write-Host "Devsuite '$ProjectDescription' created. Waiting now for tenants" -ForegroundColor Green         
-            $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription 
-            Wait-DevSuiteTenantsReady -DevSuite $devSuite.name -TimeoutMinutes $TimeoutMinutes
+            Write-Host "Devsuite '$ProjectDescription' created. Waiting now for tenants" -ForegroundColor Green                     
+            Wait-DevSuiteTenantsReady -DevSuite $ProjectDescription -TimeoutMinutes $TimeoutMinutes
             Write-Host "Tenants of devsuite '$ProjectDescription' also ready" -ForegroundColor Green         
             return $devSuite            
         }    
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 30
     }    
 
-    throw "New-DevSuite timeout"
+    throw "Timeout creating new devsuite '$ProjectDescription'!"
 }
 Export-ModuleMember -Function  New-DevSuite

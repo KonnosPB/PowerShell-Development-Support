@@ -67,15 +67,26 @@
             -CostCenter $Global:Config.DevSuiteCostCenter `
             -LeadDeveloper $Global:Config.DevSuiteLeadDeveloper `
             -ArtifactUrl $script:ArtefactUrl  `
-            -AzureDevOps $script:ProjectNo =  $script:AzureDevOps `
+            -AzureDevOps $script:AzureDevOps `
             -KUMATarget $script:KUMATarget 
-    }
 
-    if (-not $SkipMigration.IsPresent) {
         # Neue DevSuite object beschaffen        
         $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
         if (-not $newDevSuiteObj) {
             throw "DevSuite '$NewDevSuite' konnte nicht erfolgreich angelegt werden."
+        }    
+    }
+
+    if (-not $SkipMigration.IsPresent) {
+
+        if (-not (Test-DevSuiteStarted -DevSuite $MigrationDevSuite)) {
+            Start-DevSuite -DevSuite $MigrationDevSuite
+        }
+
+        # Neue DevSuite object beschaffen        
+        $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
+        if (-not $newDevSuiteObj) {
+            throw "DevSuite '$NewDevSuite' nicht gefunden."
         }    
 
         # Migrations DevSuite object beschaffen
@@ -86,10 +97,15 @@
 
         Invoke-DevSuiteMigrate -SourceResourceGroup $migrationDevSuite.resourceGroup `
             -SourceDevSuite $migrationDevSuite.name `
-            -SourceTenant $testTenantName `
+            -SourceTenant $Tenant `
             -DestinationResourceGroup $newDevSuite.resourceGroup `
             -DestinationDevSuite $newDevSuiteDescription `
-            -DestinationTenant $testTenantName
+            -DestinationTenant $Tenant
+        
+        $TenantObj = Get-DevSuiteTenant -DevSuite $NewDevSuite -Tenant  $Tenant
+        if (-not $TenantObj) {
+            throw "Tenant ' $Tenant' konnte nicht erfolreich in $NewDevSuite angelegt werden."
+        } 
     }
 
     # Installation App in test-Tenant
@@ -99,12 +115,12 @@
         -Tenant $Tenant `
         -DevSuite $NewDevSuite
 
-    foreach ($User in $Users){
+    foreach ($User in $Users) {
         New-DevSuiteUser -UserName $User -DevSuite $NewDevSuite -Tenant $Tenant -ErrorAction SilentlyContinue
     }
 
     # cronusag tenant anlegen
-    if (-not $SkipCronus){
+    if (-not $SkipCronus) {
         Invoke-DevSuiteCopy -DevSuite $NewDevSuite -SourceTenant "default" -DestinationTenant "cronusag"
     } 
     

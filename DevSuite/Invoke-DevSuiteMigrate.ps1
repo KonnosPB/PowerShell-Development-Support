@@ -46,7 +46,7 @@ function Invoke-DevSuiteMigrate {
         [Parameter(Mandatory = $true)]
         [string] $DestinationTenant,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 45
+        [int] $TimeoutMinutes = 60
     )   
 
     Write-Host "Migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationTenant' in devsuite '$DestinationDevSuite'" -ForegroundColor Green
@@ -66,9 +66,9 @@ function Invoke-DevSuiteMigrate {
     } | ConvertTo-Json
 
     $uri = Get-DevSuiteUri -Route "migrateTenant"    
-    Start-Job -ScriptBlock { 
+    #Start-Job -ScriptBlock { 
         Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject
-    } | Out-Null
+    #} | Out-Null
 
     # Startzeit festlegen
     $startTime = Get-Date
@@ -78,15 +78,15 @@ function Invoke-DevSuiteMigrate {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
+        Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
         $tenant = Get-DevSuiteTenant -DevSuite $DestinationDevSuite -Tenant $DestinationTenant 
         if ($tenant -and @('Mounted', 'Operational') -contains $tenant.Status) {  
             Write-Host "Tenant '$DestinationDevSuite'copied and mounted successfully into '$DestinationTenant' from devsuite '$SourceDevSuite' tenant '$SourceTenant'" -ForegroundColor Green                
-            return $true            
+            return $tenant          
         }    
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 30
     }    
-    return $false
+    throw "Timeout migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationDevSuite'!"
 }
 
 Export-ModuleMember -Function Invoke-DevSuiteMigrate

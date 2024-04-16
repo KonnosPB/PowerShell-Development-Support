@@ -29,13 +29,19 @@ function Wait-DevSuiteTenantsReady {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
-        $tenants = Get-DevSuiteTenants -DevSuite $DevSuite 
-        $unreadyTenants = $tenants |  Where-Object { (-not (@('Mounted', 'Operational') -contains $_.status)) }        
-        if ((-not $unreadyTenants) -and ($tenants.Count -gt 0)) {
-            return;
-        }         
-        Start-Sleep -Seconds 10
+        Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
+        try {
+            $tenants = Get-DevSuiteTenants -DevSuite $DevSuite 
+            if ($tenants) {
+                $unreadyTenants = $tenants |  Where-Object { (-not (@('Mounted', 'Operational') -contains $_.status)) }        
+                Write-Host "Unready tenants $unreadyTenants"
+                if ((-not $unreadyTenants) -and ($tenants.Count -gt 0)) {
+                    return $true;
+                }   
+            }
+        }      
+        catch {}
+        Start-Sleep -Seconds 30
     }    
 
     throw "Wait-DevSuiteTenantsReady timeout"

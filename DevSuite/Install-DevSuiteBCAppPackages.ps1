@@ -36,7 +36,7 @@ function Install-DevSuiteBCAppPackages {
         [Parameter(Mandatory = $false)]
         [string[]] $InstallPreviewApps = @(),
         [Parameter(Mandatory = $false)]
-        [string] $TimeoutMinutes = 5  
+        [string] $TimeoutMinutes = 15  
     )   
     
     Write-Host "Installing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
@@ -99,9 +99,9 @@ function Install-DevSuiteBCAppPackages {
     $body = ConvertTo-Json -InputObject $objs
     $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/bcapps"
-    Start-Job -ScriptBlock {
+    #Start-Job -ScriptBlock {
         Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling
-    }| Out-Null
+    #}| Out-Null
         
     # Startzeit festlegen
     $startTime = Get-Date
@@ -111,16 +111,16 @@ function Install-DevSuiteBCAppPackages {
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
-        Write-Progress -Activity "Waiting for $minutes minutes" -Status "$percentComplete%" -PercentComplete $percentComplete
+        Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
         $publishedApps = Get-DevSuitePublishedBCAppPackages -DevSuite $DevSuite -Tenant $Tenant
         $publishedApp = $publishedApps | Where-Object ({ $_.appId -eq $selectedApp.appId })
         if ($publishedApp) {
             Write-Host "App $publishedApp successfully published" -ForegroundColor Green
             return $publishedApp
         }        
-        Start-Sleep -Seconds 5
+        Start-Sleep -Seconds 10
     }    
-    return $null
+    throw "Timeout publishing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'"
 }
 
 Export-ModuleMember -Function Install-DevSuiteBCAppPackages

@@ -38,6 +38,9 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\Import-DevSuiteTestToolkit.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteBearerToken.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\New-DevSuite.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Start-DevSuite.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Test-DevSuiteStarted.ps1")
+
 
 # DevOps
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsUri.ps1")
