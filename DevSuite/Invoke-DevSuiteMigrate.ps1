@@ -65,7 +65,7 @@ function Invoke-DevSuiteMigrate {
         "DestinationTenantName"    = $DestinationTenant
     } | ConvertTo-Json
 
-    $uri = Get-DevSuiteUri -Route "migrateTenant"    
+    $uri = Get-DevSuiteUri -Route "migrateTenant/async"    
     #Start-Job -ScriptBlock { 
         Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject
     #} | Out-Null

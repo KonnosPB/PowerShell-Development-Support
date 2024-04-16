@@ -82,7 +82,7 @@ function New-DevSuite {
     #Check if devsuite already exist
     $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription
     if ($newDevSuiteObj){
-        Write-Host "DevSuite '$ProjectManagement' already exist. Skip creating a new one"    
+        Write-Host "DevSuite '$ProjectDescription' already exist. Skip creating a new one"    
         return $newDevSuiteObj
     }
          

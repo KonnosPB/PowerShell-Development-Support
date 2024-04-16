@@ -84,22 +84,22 @@
         }
 
         # Neue DevSuite object beschaffen        
-        $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
-        if (-not $newDevSuiteObj) {
+        $script:newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
+        if (-not $script:newDevSuiteObj) {
             throw "DevSuite '$NewDevSuite' nicht gefunden."
         }    
 
         # Migrations DevSuite object beschaffen
-        $migrationDevSuite = Get-DevSuiteEnvironment -NameOrDescription $MigrationDevSuite
-        if (-not $migrationDevSuite) {
+        $script:migrationDevSuite = Get-DevSuiteEnvironment -NameOrDescription $MigrationDevSuite
+        if (-not $script:migrationDevSuite) {
             throw "DevSuite '$MigrationDevSuite' nicht gefunden."
         }     
 
-        Invoke-DevSuiteMigrate -SourceResourceGroup $migrationDevSuite.resourceGroup `
-            -SourceDevSuite $migrationDevSuite.name `
+        Invoke-DevSuiteMigrate -SourceResourceGroup $script:migrationDevSuite.resourceGroup `
+            -SourceDevSuite $script:migrationDevSuite.name `
             -SourceTenant $Tenant `
-            -DestinationResourceGroup $newDevSuite.resourceGroup `
-            -DestinationDevSuite $newDevSuiteDescription `
+            -DestinationResourceGroup $script:newDevSuiteObj.resourceGroup `
+            -DestinationDevSuite $script:newDevSuiteObj.name `
             -DestinationTenant $Tenant
         
         $TenantObj = Get-DevSuiteTenant -DevSuite $NewDevSuite -Tenant  $Tenant
