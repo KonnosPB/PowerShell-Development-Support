@@ -33,29 +33,42 @@ This example migrates "Tenant1" from "DevSuite1" in "ResourceGroup1" to "DevSuit
 #>
 function Invoke-DevSuiteMigrate {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $SourceResourceGroup,
+        [Parameter(Mandatory = $false)]
+        [string] $SourceResourceGroup =$null,
         [Parameter(Mandatory = $true)]
         [string] $SourceDevSuite,
         [Parameter(Mandatory = $true)]
         [string] $SourceTenant,
-        [Parameter(Mandatory = $true)]
-        [string] $DestinationResourceGroup,
+        [Parameter(Mandatory = $false)]
+        [string] $DestinationResourceGroup = $null,
         [Parameter(Mandatory = $true)]
         [string] $DestinationDevSuite,
-        [Parameter(Mandatory = $true)]
-        [string] $DestinationTenant,
+        [Parameter(Mandatory = $false)]
+        [string] $DestinationTenant = $null,
         [Parameter(Mandatory = $false)]
         [int] $TimeoutMinutes = 60
-    )   
-
-    Write-Host "Migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationTenant' in devsuite '$DestinationDevSuite'" -ForegroundColor Green
+    )      
 
     $sourceTenantObj = Get-DevSuiteTenant -DevSuite $SourceDevSuite -Tenant $SourceTenant
     if (-not $sourceTenantObj) {
         throw "Source tenant '$SourceTenant' doesn't exist in '$SourceDevSuite'"
     }
+
+    if (-not $SourceResourceGroup){
+        $sourceDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $SourceDevSuite
+        $SourceResourceGroup = $sourceDevSuiteObj.resourceGroup
+    }
+
+    if (-not $DestinationResourceGroup){
+        $DestinationResourceGroup = $SourceResourceGroup
+    }
+
+    if (-not $DestinationDevSuite){
+        $DestinationDevSuite = $SourceTenant
+    }
     
+    Write-Host "Migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationTenant' in devsuite '$DestinationDevSuite'" -ForegroundColor Green
+
     $jsonObject = @{
         "SourceResourceGroup"      = $SourceResourceGroup
         "SourceVmName"             = $SourceDevSuite

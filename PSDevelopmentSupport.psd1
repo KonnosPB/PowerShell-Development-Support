@@ -33,7 +33,8 @@
     Description          = 'PowerShell module, which makes it easier to work with KUMA environments.'
     
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion    = '7.4.1'
+    #PowerShellVersion    = '7.4.1'
+    PowerShellVersion    = '5.0.0'
     
     # Name of the Windows PowerShell host required by this module
     # PowerShellHostName = ''
