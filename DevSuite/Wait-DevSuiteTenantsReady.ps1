@@ -17,7 +17,8 @@ This example checks the readiness of the tenants in the 'TestSuite' DevSuite. It
 #>
 function Wait-DevSuiteTenantsReady {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
         [Parameter(Mandatory = $false)]
         [int] $TimeoutMinutes = 100

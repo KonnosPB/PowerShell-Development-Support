@@ -24,7 +24,8 @@ This example copies Tenant1 from DevSuite1 to Tenant2 in the same DevSuite and w
 #>
 function Invoke-DevSuiteCopy {
     Param (      
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
         [Parameter(Mandatory = $true)]
         [string] $SourceTenant,

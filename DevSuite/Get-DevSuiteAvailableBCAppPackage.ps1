@@ -1,60 +1,72 @@
 <#
 .SYNOPSIS
-This function retrieves the latest version of a specified application from a given DevSuite.
+This function retrieves the available BC app package from the specified DevSuite.
 
 .DESCRIPTION
-The Get-DevSuiteAvailableBCAppPackage function is used to get the latest version of a specified application package from a given DevSuite. The application package is identified by the $AppName parameter. By default, the function only returns non-test and non-preview versions of the application package, but this can be modified by using the $TestApp and $Preview switch parameters.
+The function Get-DevSuiteAvailableBCAppPackage retrieves the specified BC app package information from the provided DevSuite. 
+The function filters the app packages based on the provided AppName, TestApp, and Preview switches. The function returns the app package sorted by the app version.
 
 .PARAMETER DevSuite
-The DevSuite parameter is a mandatory string parameter that specifies the DevSuite from which the application package is to be retrieved.
+This parameter specifies the name or description of the DevSuite from which the app package information is to be retrieved. 
+This is a mandatory parameter.
 
 .PARAMETER AppName
-The AppName parameter is a mandatory string parameter that specifies the name of the application package to be retrieved.
+This parameter specifies the name of the app for which the package information is to be retrieved from the DevSuite. 
+This is a mandatory parameter.
 
 .PARAMETER TestApp
-The TestApp parameter is an optional switch parameter. When this switch is used, the function will return test versions of the application package in addition to the non-test versions.
+This switch parameter determines whether to include test apps in the retrieved app packages. 
+If not specified, the function will exclude test apps from the retrieved app packages.
 
 .PARAMETER Preview
-The Preview parameter is an optional switch parameter. When this switch is used, the function will return preview versions of the application package in addition to the non-preview versions.
+This switch parameter determines whether to include preview apps in the retrieved app packages. 
+If not specified, the function will exclude preview apps from the retrieved app packages.
 
 .EXAMPLE
-PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1"
-This command retrieves the latest version of the "App1" application package from the "Suite1" DevSuite.
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1"
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1".
 
 .EXAMPLE
-PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1" -TestApp
-This command retrieves the latest version of the "App1" application package, including test versions, from the "Suite1" DevSuite.
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1" -TestApp
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1", including test apps.
 
 .EXAMPLE
-PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "Suite1" -AppName "App1" -Preview
-This command retrieves the latest version of the "App1" application package, including preview versions, from the "Suite1" DevSuite.
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1" -Preview
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1", including preview apps.
 #>
 function Get-DevSuiteAvailableBCAppPackage {
-    Param (
-        [Parameter(Mandatory = $true)]
+    Param (        
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, Position = 1)]
+        [Alias("App")]
         [string] $AppName,
         [Parameter(Mandatory = $false)]
         [Switch] $TestApp,
         [Parameter(Mandatory = $false)]
         [Switch] $Preview       
     )
-    Write-Debug "Getting app package info of $AppName from devsuite '$DevSuite'" 
-
-    $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
-    $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
-    if (-not $TestApp) {
-        $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isTestApp -eq $false }
+    BEGIN {
+        Write-Debug "Getting app package info of $AppName from devsuite '$DevSuite'" 
     }
 
-    if (-not $Preview) {
-        $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isPreview -eq $false }
-    }
+    PROCESS {   
 
-    $selectedApp = $selectedAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1   
-    Write-Debug " ✅"
-    return  $selectedApp
+        $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
+        $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
+        if (-not $TestApp) {
+            $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isTestApp -eq $false }
+        }
+
+        if (-not $Preview) {
+            $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isPreview -eq $false }
+        }
+
+        $selectedApp = $selectedAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1       
+        Write-Output $selectedApp
+    }
+    END {}  
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackage

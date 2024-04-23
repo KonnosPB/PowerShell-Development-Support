@@ -1,42 +1,50 @@
 <#
 .SYNOPSIS
-This function retrieves all tenants from a specific DevSuite environment.
+This function retrieves all tenants from a specific DevSuite.
 
 .DESCRIPTION
-The Get-DevSuiteTenants function is used to obtain all the tenants from a specified DevSuite environment. It first retrieves the DevSuite object using the Get-DevSuiteEnvironment function. If the object does not exist, it returns null. Otherwise, it constructs a URI for the request using the Get-DevSuiteUri function and sends a GET request to the DevSuite API using the Invoke-DevSuiteWebRequest function. The function then converts the response content from JSON format to a PowerShell object and returns it.
+The Get-DevSuiteTenants function retrieves and outputs the details of all tenants from the specified DevSuite. 
+It first gets the DevSuite environment based on the input parameter and then it invokes a web request to the DevSuite with a specific route. 
+The response is then converted from Json to output the tenants.
 
 .PARAMETER DevSuite
-A mandatory parameter that specifies the name or description of the DevSuite environment from which the tenants are to be retrieved.
+This mandatory parameter specifies the name or description of the DevSuite from which to retrieve tenants. 
+It accepts pipeline input and aliases including "Name", "Description", and "NameOrDescription".
 
 .EXAMPLE
-```powershell
-PS C:\> Get-DevSuiteTenants -DevSuite "DevSuite1"
-```
-This command retrieves all tenants from the DevSuite environment named "DevSuite1".
+Get-DevSuiteTenants -DevSuite "Dev Suite 1"
+This example retrieves all tenants from the DevSuite named "Dev Suite 1".
 
 .EXAMPLE
-```powershell
-PS C:\> $tenants = Get-DevSuiteTenants -DevSuite "DevSuite1"
-PS C:\> $tenants.Count
-```
-This command retrieves all tenants from the DevSuite environment named "DevSuite1" and stores them in the $tenants variable. The next command outputs the number of tenants.
+"Dev Suite 1" | Get-DevSuiteTenants
+This example retrieves all tenants from the DevSuite named "Dev Suite 1", with the DevSuite name provided via pipeline input.
+
 #>
 function Get-DevSuiteTenants {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite
     )
-
-    Write-Debug "Getting all tenant infos from devsuite '$DevSuite'" 
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
-    if (-not $devSuiteObj) {
-        return $null
+    BEGIN {
+        Write-Debug "Getting all tenant infos from devsuite '$DevSuite'" 
     }
 
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant" -Parameter "clearCache=true"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
-    $tenants = $response.Content | ConvertFrom-Json
-    return $tenants
+    PROCESS {
+        
+        $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+        if (-not $devSuiteObj) {
+            return $null
+        }
+
+        $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant" -Parameter "clearCache=true"
+        $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
+        $tenants = $response.Content | ConvertFrom-Json
+        foreach ($tenant in $tenants) {
+            Write-Output $tenant
+        }
+    }
+    END {}
 }
 
 Export-ModuleMember -Function Get-DevSuiteTenants

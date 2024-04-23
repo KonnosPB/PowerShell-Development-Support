@@ -1,7 +1,8 @@
 function Start-DevSuite {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $DevSuite
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite,
         [Parameter(Mandatory = $false)]
         [string] $TimeoutMinutes = 30  
     )

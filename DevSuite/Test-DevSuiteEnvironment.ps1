@@ -22,10 +22,11 @@ This command checks if a DevSuite environment with the name or description "NonE
 #>
 function Test-DevSuiteEnvironment {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $NameOrDescription
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
-    $devSuiteEnvironment = Get-DevSuiteEnvironment -NameOrDescription $NameOrDescription 
+    $devSuiteEnvironment = Get-DevSuiteEnvironment -NameOrDescription $DevSuite 
     if ($devSuiteEnvironment) {
         return $true
     }
