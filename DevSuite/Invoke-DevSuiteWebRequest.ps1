@@ -59,11 +59,11 @@ function Invoke-DevSuiteWebRequest {
     if ($Body) {
         #$authHeaders.Add("Content-Type", $ContentType)
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType -SkipHttpErrorCheck
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType
     }
     else {
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -SkipHttpErrorCheck 
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders
     }      
     
     if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {        

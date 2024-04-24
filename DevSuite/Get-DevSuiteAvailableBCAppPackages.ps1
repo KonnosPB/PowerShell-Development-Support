@@ -1,30 +1,52 @@
+
 <#
 .SYNOPSIS
-This function retrieves available BC app packages for a specified DevSuite.
+Retrieves the available BC app packages from a specified DevSuite.
 
 .DESCRIPTION
-The Get-DevSuiteAvailableBCAppPackages function sends a GET request to a DevSuite's BC packages route. It uses the Invoke-DevSuiteWebRequest function to send this request and receives a response. The response content is converted from JSON format and returned as the result.
+The Get-DevSuiteAvailableBCAppPackages function retrieves the available BC app packages from a specified DevSuite. It is a process that involves calling other functions like Get-DevSuiteEnvironment and Invoke-DevSuiteWebRequest to get the necessary details. The function then outputs the app packages found.
 
 .PARAMETER DevSuite
-This is the mandatory string parameter that specifies the DevSuite for which the BC app packages are to be retrieved.
+This is a mandatory string parameter that specifies the DevSuite from which to retrieve the BC app packages. It has aliases "Name", "Description", and "NameOrDescription" for flexibility.
 
 .EXAMPLE
 Get-DevSuiteAvailableBCAppPackages -DevSuite "DevSuite1"
 
-This command retrieves the available BC app packages for the DevSuite named "DevSuite1".
+This command retrieves the BC app packages from the DevSuite named "DevSuite1".
 
-#>function Get-DevSuiteAvailableBCAppPackages {
+.EXAMPLE
+Get-DevSuiteAvailableBCAppPackages -Name "DevSuite1"
+
+This command retrieves the BC app packages from the DevSuite named "DevSuite1". It uses the alias "Name" for the DevSuite parameter.
+
+.EXAMPLE
+Get-DevSuiteAvailableBCAppPackages -Description "DevSuite for development"
+
+This command retrieves the BC app packages from the DevSuite with the description "DevSuite for development". It uses the alias "Description" for the DevSuite parameter.
+#>
+function Get-DevSuiteAvailableBCAppPackages {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite
     )
-    Write-Debug "Getting all app packages infos from devsuite '$DevSuite'"
+    BEGIN {
+        Write-Debug "Getting all app packages infos from devsuite '$DevSuite'"
+    }
 
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/bcpackages"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
-    $appPackages = $response.Content | ConvertFrom-Json
-    return $appPackages
+    PROCESS {  
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
+        $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/bcpackages"
+        $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
+        $appPackages = $response.Content | ConvertFrom-Json
+        foreach ($appPackage in $appPackages) {
+            Write-Output $appPackage
+        }    
+    }
+    END {}  
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteApps" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteAppPackages" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuitePackages" -Value Get-DevSuiteAvailableBCAppPackages

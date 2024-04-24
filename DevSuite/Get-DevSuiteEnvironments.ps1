@@ -1,31 +1,40 @@
 <#
 .SYNOPSIS
-This function retrieves the environments from the DevSuite.
+This function retrieves all devsuite environments.
 
 .DESCRIPTION
-The Get-DevSuiteEnvironments function makes a GET web request to the DevSuite's "vm" route. It parses the JSON response and returns it. If the web request fails or an error occurs, it returns false or an empty array respectively.
+The Get-DevSuiteEnvironments function makes a GET request to the specified DevSuite URI and retrieves all the environments. The function uses the Get-DevSuiteUri function to construct the URI and the Invoke-DevSuiteWebRequest function to make the request.
 
 .PARAMETER
-The function does not take any parameters.
+No parameter is needed for this function.
 
-.EXAMPLES
-Example 1: Get-DevSuiteEnvironments
-This example calls the function without any parameters. It returns a JSON object with the environments from the DevSuite.
+.EXAMPLE
+Get-DevSuiteEnvironments
 
+This example demonstrates how to call the function to get all devsuite environments.
 #>
-function Get-DevSuiteEnvironments {
-    Write-Debug "Getting all devsuite infos" 
-    try {
-        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
-        $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET" -SkipErrorHandling
-        if ($result.StatusCode -ne 200) {
-            return false;
+function Get-DevSuiteEnvironments {    
+    BEGIN {
+        Write-Debug "Getting all devsuite environments" 
+    }
+
+    PROCESS {       
+        try {
+            $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
+            $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
+            if ($result.StatusCode -ne 200) {
+                Write-Output $null
+            }
+            $jsonDevSuites = $result.Content | ConvertFrom-Json
+            foreach($jsonDevSuite in $jsonDevSuites){                
+                Write-Output $jsonDevSuite
+            }            
         }
-        $jsonDevSuite = $result.Content | ConvertFrom-Json
-        return $jsonDevSuite;        
+        catch {
+            Write-Output @()
+        }        
     }
-    catch {
-        return @()
-    }
+    END {}  
 }
 Export-ModuleMember -Function Get-DevSuiteEnvironments
+New-Alias "Get-DevSuites" -Value Get-DevSuiteEnvironment

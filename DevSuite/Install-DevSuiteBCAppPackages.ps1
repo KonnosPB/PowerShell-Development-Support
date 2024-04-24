@@ -27,7 +27,8 @@ This example installs the "App1" package in "DevSuite1" and "Tenant1" with a tim
 #>
 function Install-DevSuiteBCAppPackages {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
         [Parameter(Mandatory = $true)]
         [string] $Tenant,
@@ -36,7 +37,7 @@ function Install-DevSuiteBCAppPackages {
         [Parameter(Mandatory = $false)]
         [string[]] $InstallPreviewApps = @(),
         [Parameter(Mandatory = $false)]
-        [string] $TimeoutMinutes = 15  
+        [string] $TimeoutMinutes = 45  
     )   
     
     Write-Host "Installing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
@@ -45,7 +46,7 @@ function Install-DevSuiteBCAppPackages {
 
     $tenantObj = Get-DevSuiteTenant -DevSuite $DevSuite -Tenant $Tenant
     if (-not $tenantObj){
-        throw "Not tenant '$Tenant' found in devsuite '$DevSuite'"
+        throw "No tenant '$Tenant' found in devsuite '$DevSuite'"
     }
 
     $selectedAppPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
@@ -97,7 +98,7 @@ function Install-DevSuiteBCAppPackages {
     }
     
     $body = ConvertTo-Json -InputObject $objs
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/bcapps"
     #Start-Job -ScriptBlock {
         Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling
@@ -124,3 +125,6 @@ function Install-DevSuiteBCAppPackages {
 }
 
 Export-ModuleMember -Function Install-DevSuiteBCAppPackages
+New-Alias "Install-DevSuiteAppPackages" -Value Install-DevSuiteBCAppPackages
+New-Alias "Install-DevSuiteApps" -Value Install-DevSuiteBCAppPackages
+New-Alias "Install-DevSuitePackages" -Value Install-DevSuiteBCAppPackages

@@ -29,7 +29,8 @@ This example will import the DevSuite Test Toolkit into the specified tenant wit
 #>
 function Import-DevSuiteTestToolkit {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
         [Parameter(Mandatory = $true)]
         [string] $Tenant,
@@ -39,7 +40,7 @@ function Import-DevSuiteTestToolkit {
         [bool] $IncludeTestFrameworkOnly = $false
     )   
     Write-Host "Importing test tool kit into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/importtesttoolkit" -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 }

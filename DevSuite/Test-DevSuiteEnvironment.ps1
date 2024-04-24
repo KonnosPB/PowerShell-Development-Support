@@ -10,22 +10,23 @@ This parameter accepts a string value. The value can either be the name or descr
 
 .EXAMPLE
 ```powershell
-PS C:\> Test-DevSuiteEnvironment -NameOrDescription "Test Environment"
+PS C:\> Test-DevSuiteEnvironment -DevSuite "Test Environment"
 ```
 This command checks if a DevSuite environment with the name or description "Test Environment" exists and returns true or false.
 
 .EXAMPLE
 ```powershell
-PS C:\> Test-DevSuiteEnvironment -NameOrDescription "NonExistentEnvironment"
+PS C:\> Test-DevSuiteEnvironment -DevSuite "NonExistentEnvironment"
 ```
 This command checks if a DevSuite environment with the name or description "NonExistentEnvironment" exists. Since no such environment exists, it will return false.
 #>
 function Test-DevSuiteEnvironment {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $NameOrDescription
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
-    $devSuiteEnvironment = Get-DevSuiteEnvironment -NameOrDescription $NameOrDescription 
+    $devSuiteEnvironment = Get-DevSuiteEnvironment -DevSuite $DevSuite 
     if ($devSuiteEnvironment) {
         return $true
     }

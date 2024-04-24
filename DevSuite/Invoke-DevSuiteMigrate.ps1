@@ -1,40 +1,8 @@
-<#
-.SYNOPSIS
-The Invoke-DevSuiteMigrate function migrates a tenant from one DevSuite to another.
 
-.DESCRIPTION
-This function retrieves the source tenant, constructs a JSON object with the necessary migration information, and sends a web request to initiate the migration. It will then wait until the migration is complete or the timeout has been reached.
-
-.PARAMETER SourceResourceGroup
-The name of the resource group of the source DevSuite.
-
-.PARAMETER SourceDevSuite
-The name of the source DevSuite.
-
-.PARAMETER SourceTenant
-The name of the tenant in the source DevSuite.
-
-.PARAMETER DestinationResourceGroup
-The name of the resource group of the destination DevSuite.
-
-.PARAMETER DestinationDevSuite
-The name of the destination DevSuite.
-
-.PARAMETER DestinationTenant
-The name of the tenant in the destination DevSuite.
-
-.PARAMETER TimeoutMinutes
-The time in minutes that the function should wait for the migration to complete before timing out. This is optional and defaults to 45 minutes.
-
-.EXAMPLE
-Invoke-DevSuiteMigrate -SourceResourceGroup "ResourceGroup1" -SourceDevSuite "DevSuite1" -SourceTenant "Tenant1" -DestinationResourceGroup "ResourceGroup2" -DestinationDevSuite "DevSuite2" -DestinationTenant "Tenant2"
-
-This example migrates "Tenant1" from "DevSuite1" in "ResourceGroup1" to "DevSuite2" in "ResourceGroup2", naming the tenant "Tenant2" in the destination DevSuite. It will wait up to 45 minutes for the migration to complete.
-#>
 function Invoke-DevSuiteMigrate {
     Param (
         [Parameter(Mandatory = $false)]
-        [string] $SourceResourceGroup =$null,
+        [string] $SourceResourceGroup = $null,
         [Parameter(Mandatory = $true)]
         [string] $SourceDevSuite,
         [Parameter(Mandatory = $true)]
@@ -54,17 +22,17 @@ function Invoke-DevSuiteMigrate {
         throw "Source tenant '$SourceTenant' doesn't exist in '$SourceDevSuite'"
     }
 
-    if (-not $SourceResourceGroup){
-        $sourceDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $SourceDevSuite
+    if (-not $SourceResourceGroup) {
+        $sourceDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $SourceDevSuite
         $SourceResourceGroup = $sourceDevSuiteObj.resourceGroup
     }
 
-    if (-not $DestinationResourceGroup){
+    if (-not $DestinationResourceGroup) {
         $DestinationResourceGroup = $SourceResourceGroup
     }
 
-    if (-not $DestinationDevSuite){
-        $DestinationDevSuite = $SourceTenant
+    if (-not $DestinationTenant) {
+        $DestinationTenant = $SourceTenant
     }
     
     Write-Host "Migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationTenant' in devsuite '$DestinationDevSuite'" -ForegroundColor Green
@@ -80,7 +48,7 @@ function Invoke-DevSuiteMigrate {
 
     $uri = Get-DevSuiteUri -Route "migrateTenant/async"    
     #Start-Job -ScriptBlock { 
-        Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' -Body $jsonObject
     #} | Out-Null
 
     # Startzeit festlegen

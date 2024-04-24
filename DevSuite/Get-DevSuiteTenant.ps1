@@ -24,15 +24,22 @@ This command will retrieve the tenant "Tenant2" from the DevSuite "DevSuite2" an
 #>
 function Get-DevSuiteTenant {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 1)]
         [string] $Tenant
     )
-    Write-Debug "Getting tenant info from devsuite '$DevSuite' tenant '$Tenant'" 
-    $tenants = Get-DevSuiteTenants -DevSuite $DevSuite
-    $tenantObj = $tenants | Where-Object { $_.name -eq $Tenant } | Select-Object -First 1    
-    return $tenantObj
+    BEGIN {
+        Write-Debug "Getting tenant info from devsuite '$DevSuite' tenant '$Tenant'" 
+    }
+
+    PROCESS {            
+        $tenants = Get-DevSuiteTenants -DevSuite $DevSuite
+        $tenantObj = $tenants | Where-Object { $_.name -eq $Tenant } | Select-Object -First 1    
+        Write-Output $tenantObj
+    }
+    END {}
 }
 
 Export-ModuleMember -Function Get-DevSuiteTenant
