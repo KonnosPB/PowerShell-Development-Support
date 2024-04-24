@@ -13,19 +13,32 @@ Get-DevSuiteEnvironments
 
 This example demonstrates how to call the function to get all devsuite environments.
 #>
-function Get-DevSuiteEnvironments {    
+function Get-DevSuiteEnvironments {   
+    Param (
+        [Parameter(Mandatory = $false, Position = 0)]
+        [ValidateSet("Healthcare", "Medtec")]        
+        [string] $Solution
+    ) 
     BEGIN {
         Write-Debug "Getting all devsuite environments" 
     }
 
     PROCESS {              
+        $script:Regex = ".*"
+        if ($Solution -eq "Medtec") {
+            $script:Regex = "(MEDTEC|MTC).*Produkt.*"            
+        }elseif($Solution -eq "Healthcare")  {
+            $script:Regex = "(HC|Healthcare).*Produkt.*"            
+        }
+
         $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
         $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
         if ($result.StatusCode -ne 200) {
             Write-Output $null
             return
         }
-        $jsonDevSuites = $result.Content | ConvertFrom-Json
+        $jsonDevSuites = $result.Content | ConvertFrom-Json 
+        $jsonDevSuites = $jsonDevSuites | Where-Object {$_.projectDescription -match $script:Regex}
         foreach ($jsonDevSuite in $jsonDevSuites) {                
             Write-Output $jsonDevSuite
         }                       
