@@ -30,9 +30,8 @@ function Get-DevSuiteTenants {
         Write-Debug "Getting all tenant infos from devsuite '$DevSuite'" 
     }
 
-    PROCESS {
-        
-        $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    PROCESS {        
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
         if (-not $devSuiteObj) {
             return $null
         }

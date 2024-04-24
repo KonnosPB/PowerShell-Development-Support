@@ -24,7 +24,7 @@ function Test-DevSuiteBearerToken {
         $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
         $authHeaders.Add("Authorization", $bearerToken)    
         $authHeaders.Add("Connection", 'keep-alive')       
-        $result = Invoke-WebRequest -Uri $uri -Method GET -Headers $authHeaders -SkipHttpErrorCheck     
+        $result = Invoke-WebRequest -Uri $uri -Method GET -Headers $authHeaders  
     
         if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {            
             return($true)

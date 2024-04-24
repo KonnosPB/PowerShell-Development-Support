@@ -21,7 +21,7 @@ function Get-DevSuiteEnvironments {
     PROCESS {       
         try {
             $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
-            $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET" -SkipErrorHandling
+            $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
             if ($result.StatusCode -ne 200) {
                 Write-Output $null
             }
@@ -37,3 +37,4 @@ function Get-DevSuiteEnvironments {
     END {}  
 }
 Export-ModuleMember -Function Get-DevSuiteEnvironments
+New-Alias "Get-DevSuites" -Value Get-DevSuiteEnvironment

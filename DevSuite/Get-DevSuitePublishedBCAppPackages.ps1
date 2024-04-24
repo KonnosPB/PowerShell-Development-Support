@@ -33,7 +33,7 @@ function Get-DevSuitePublishedBCAppPackages {
     PROCESS {
         Write-Debug "Getting published app app packages infos from devsuite '$DevSuite'"
 
-        $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
         $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/appInfo"
         $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
         $appPackages = $response.Content | ConvertFrom-Json
@@ -45,3 +45,6 @@ function Get-DevSuitePublishedBCAppPackages {
 }
 
 Export-ModuleMember -Function Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedApps" -Value Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedAppPackages" -Value Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedPackages" -Value Get-DevSuitePublishedBCAppPackages

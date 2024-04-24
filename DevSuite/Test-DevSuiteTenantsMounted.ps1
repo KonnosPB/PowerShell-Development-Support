@@ -22,8 +22,9 @@
 #>
 function Test-DevSuiteTenantsMounted {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $DevSuite
+      [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+      [Alias("Name", "Description", "NameOrDescription")]
+      [string] $DevSuite
     )
     $devSuite = Get-DevSuiteTenants -DevSuite $DevSuite 
     if (-not $devSuite) {

@@ -71,7 +71,7 @@
             -KUMATarget $script:KUMATarget 
 
         # Neue DevSuite object beschaffen        
-        $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
+        $newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $NewDevSuite     
         if (-not $newDevSuiteObj) {
             throw "DevSuite '$NewDevSuite' konnte nicht erfolgreich angelegt werden."
         }    
@@ -84,13 +84,13 @@
         }
 
         # Neue DevSuite object beschaffen        
-        $script:newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $NewDevSuite     
+        $script:newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $NewDevSuite     
         if (-not $script:newDevSuiteObj) {
             throw "DevSuite '$NewDevSuite' nicht gefunden."
         }    
 
         # Migrations DevSuite object beschaffen
-        $script:migrationDevSuite = Get-DevSuiteEnvironment -NameOrDescription $MigrationDevSuite
+        $script:migrationDevSuite = Get-DevSuiteEnvironment -DevSuite $MigrationDevSuite
         if (-not $script:migrationDevSuite) {
             throw "DevSuite '$MigrationDevSuite' nicht gefunden."
         }     

@@ -42,7 +42,7 @@ function Invoke-DevSuiteCopy {
         throw "Source tenant $SourceTenant doesn't exist in $DevSuite"
     } 
 
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$SourceTenant/copyTo/$DestinationTenant"
     #Start-Job -ScriptBlock {
         Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'

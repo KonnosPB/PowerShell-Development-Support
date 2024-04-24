@@ -9,7 +9,7 @@ The Get-DevSuiteEnvironment function is used to fetch and display the details of
 This is a mandatory string parameter. It can accept either the name or description of a DevSuite environment. The function will match this parameter against the name or project description of the environments stored in the global DevSuiteEnvironments object.
 
 .EXAMPLE
-Get-DevSuiteEnvironment -NameOrDescription "Test Environment"
+Get-DevSuiteEnvironment -DevSuite "Test Environment"
 This will fetch and display the details of the "Test Environment" from the global DevSuiteEnvironments object.
 
 .EXAMPLE
@@ -19,21 +19,21 @@ This will also fetch and display the details of the "Test Environment" from the 
 function Get-DevSuiteEnvironment {
     Param (
         [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
-        [Alias("Name", "Description", "DevSuite")]
-        [string] $NameOrDescription
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
     BEGIN {}
 
     PROCESS {
         try {
-            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1
+            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $DevSuite) -or ($_.projectDescription -eq $DevSuite) } | Select-Object -First 1
             if ($devSuiteObj) {
                 Write-Output $devSuiteObj             
             }
         
-            Write-Debug "Getting devsuite info of '$NameOrDescription'"
+            Write-Debug "Getting devsuite info of '$DevSuite'"
             $Global:DevSuiteEnvironments = Get-DevSuiteEnvironments
-            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1         
+            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $DevSuite) -or ($_.projectDescription -eq $DevSuite) } | Select-Object -First 1         
             Write-Output $devSuiteObj
         }
         catch {
@@ -44,3 +44,4 @@ function Get-DevSuiteEnvironment {
 }
 
 Export-ModuleMember -Function Get-DevSuiteEnvironment
+New-Alias "Get-DevSuite" -Value Get-DevSuiteEnvironment

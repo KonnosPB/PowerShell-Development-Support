@@ -70,3 +70,6 @@ function Get-DevSuiteAvailableBCAppPackage {
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuiteApp" -Value Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuiteAppPackage" -Value Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuitePackage" -Value Get-DevSuiteAvailableBCAppPackage

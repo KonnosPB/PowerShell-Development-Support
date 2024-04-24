@@ -8,7 +8,7 @@ function Start-DevSuite {
     )
     Write-Debug "Starting devsuite '$DevSuite'" 
 
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
     if (-not $devSuiteObj) {
         throw "Cannot start devsuite '$devSuiteObj', because the vm doesn't exist."
     }
@@ -25,7 +25,7 @@ function Start-DevSuite {
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
         Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
-        if (Test-DevSuiteEnvironment -NameOrDescription $DevSuite ) {   
+        if (Test-DevSuiteEnvironment -DevSuite $DevSuite ) {   
             Write-Host "Devsuite '$DevSuite' created. Waiting now for tenants" -ForegroundColor Green                     
             Wait-DevSuiteTenantsReady -DevSuite $devSuiteObj.name -TimeoutMinutes $TimeoutMinutes
             Write-Host "Tenants of devsuite '$DevSuite' also ready" -ForegroundColor Green         

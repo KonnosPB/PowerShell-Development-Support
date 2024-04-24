@@ -37,9 +37,9 @@ Describe "DevSuite " {
 
             Wait-DevSuiteTenantsReady -DevSuite $newDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
 
-            $oldDevSuite = Get-DevSuiteEnvironment -NameOrDescription $oldDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
+            $oldDevSuite = Get-DevSuiteEnvironment -DevSuite $oldDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
             $oldDevSuite | Should -Not -BeNullOrEmpty
-            $newDevSuite = Get-DevSuiteEnvironment -NameOrDescription $newDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
+            $newDevSuite = Get-DevSuiteEnvironment -DevSuite $newDevSuiteProjectDescription -BearerToken $Global:DevSuiteBearerToken
             $newDevSuite | Should -Not -BeNullOrEmpty            
 
             # Invoke-DevSuiteMigrate -SourceResourceGroup $oldDevSuite.resourceGroup `

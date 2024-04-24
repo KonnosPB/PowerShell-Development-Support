@@ -18,7 +18,8 @@ This example imports the "suite1.lic" license for the "Suite1" DevSuite. If the 
 #>
 function Import-DevSuiteLicense {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
         [Parameter(Mandatory = $true)]
         [string] $LicensePath
@@ -36,7 +37,7 @@ function Import-DevSuiteLicense {
     $authHeaders.Add("Authorization", $bearerToken)
     $authHeaders.Add("Connection", 'keep-alive')
 
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+    $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
 
     $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/uploadLicense"    
     $script:result = Invoke-WebRequest -Uri $uri -Method Post -InFile $LicensePath -ContentType "application/octet-stream" -Headers $authHeaders -SkipHttpErrorCheck

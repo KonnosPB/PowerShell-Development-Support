@@ -80,7 +80,7 @@ function New-DevSuite {
         [int] $TimeoutMinutes = 120
     )
     #Check if devsuite already exist
-    $newDevSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription
+    $newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $ProjectDescription
     if ($newDevSuiteObj){
         Write-Host "DevSuite '$ProjectDescription' already exist. Skip creating a new one"    
         return $newDevSuiteObj
@@ -117,7 +117,7 @@ function New-DevSuite {
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
         Write-Progress -Activity "Waiting for $minutes/$TimeoutMinutes minutes" -Status "Timeout $($percentComplete.ToString("F2"))%" -PercentComplete $percentComplete
-        if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription ) {   
+        if (Test-DevSuiteEnvironment -DevSuite $ProjectDescription ) {   
             Write-Host "Devsuite '$ProjectDescription' created. Waiting now for tenants" -ForegroundColor Green                     
             Wait-DevSuiteTenantsReady -DevSuite $ProjectDescription -TimeoutMinutes $TimeoutMinutes
             Write-Host "Tenants of devsuite '$ProjectDescription' also ready" -ForegroundColor Green         

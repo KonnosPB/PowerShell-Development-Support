@@ -35,7 +35,7 @@ function Get-DevSuiteAvailableBCAppPackages {
     }
 
     PROCESS {  
-        $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
         $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/bcpackages"
         $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
         $appPackages = $response.Content | ConvertFrom-Json
@@ -47,3 +47,6 @@ function Get-DevSuiteAvailableBCAppPackages {
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteApps" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteAppPackages" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuitePackages" -Value Get-DevSuiteAvailableBCAppPackages
