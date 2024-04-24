@@ -36,7 +36,9 @@ function Get-DevSuiteAvailableBCAppPackages {
 
     PROCESS {  
         $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
-        $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/bcpackages"
+        $devSuiteName = $devSuiteObj.name
+        $route = "vm/$devSuiteName/bcpackages"
+        $uri = Get-DevSuiteUri -Route $route
         $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
         $appPackages = $response.Content | ConvertFrom-Json
         foreach ($appPackage in $appPackages) {

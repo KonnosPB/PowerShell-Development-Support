@@ -43,7 +43,9 @@ function Invoke-DevSuiteCopy {
     } 
 
     $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$SourceTenant/copyTo/$DestinationTenant"
+    $devSuiteName = $devSuiteObj.name
+    $route = "vm/$devSuiteName/tenant/$SourceTenant/copyTo/$DestinationTenant"
+    $uri = Get-DevSuiteUri -Route $route
     #Start-Job -ScriptBlock {
         Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
     #} | Out-Null

@@ -35,9 +35,9 @@ function Get-DevSuiteTenant {
     }
 
     PROCESS {            
-        $tenants = Get-DevSuiteTenants -DevSuite $DevSuite
+        $tenants = Get-DevSuiteTenants -DevSuite $DevSuite        
         $tenantObj = $tenants | Where-Object { $_.name -eq $Tenant } | Select-Object -First 1    
-        Write-Output $tenantObj
+        Write-Output $tenantObj        
     }
     END {}
 }

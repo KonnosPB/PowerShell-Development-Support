@@ -45,7 +45,8 @@ function Get-AzureDevOpsMasterBranchPullRequests {
                 $result += $pullRequest                
             }
         }
-        catch {            
+        catch {    
+            Write-Warning $_        
         }        
     }
     return $result

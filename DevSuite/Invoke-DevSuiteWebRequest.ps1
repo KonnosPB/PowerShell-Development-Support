@@ -49,7 +49,7 @@ function Invoke-DevSuiteWebRequest {
 
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $bearerToken)
-    $authHeaders.Add("Connection", 'keep-alive')
+    #$authHeaders.Add("Connection", 'keep-alive')
     if (-not $ContentType){
         $ContentType = "application/json"
     }

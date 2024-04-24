@@ -35,11 +35,12 @@ function Import-DevSuiteLicense {
 
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $bearerToken)
-    $authHeaders.Add("Connection", 'keep-alive')
+    #$authHeaders.Add("Connection", 'keep-alive')
 
     $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
-
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/uploadLicense"    
+    $devSuiteName = $devSuiteObj.name
+    $route = "vm/$devSuiteName/uploadLicense"    
+    $uri = Get-DevSuiteUri -Route $route
     $script:result = Invoke-WebRequest -Uri $uri -Method Post -InFile $LicensePath -ContentType "application/octet-stream" -Headers $authHeaders -SkipHttpErrorCheck
 
     if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {       

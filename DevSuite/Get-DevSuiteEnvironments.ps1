@@ -18,21 +18,17 @@ function Get-DevSuiteEnvironments {
         Write-Debug "Getting all devsuite environments" 
     }
 
-    PROCESS {       
-        try {
-            $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
-            $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
-            if ($result.StatusCode -ne 200) {
-                Write-Output $null
-            }
-            $jsonDevSuites = $result.Content | ConvertFrom-Json
-            foreach($jsonDevSuite in $jsonDevSuites){                
-                Write-Output $jsonDevSuite
-            }            
+    PROCESS {              
+        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
+        $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
+        if ($result.StatusCode -ne 200) {
+            Write-Output $null
+            return
         }
-        catch {
-            Write-Output @()
-        }        
+        $jsonDevSuites = $result.Content | ConvertFrom-Json
+        foreach ($jsonDevSuite in $jsonDevSuites) {                
+            Write-Output $jsonDevSuite
+        }                       
     }
     END {}  
 }

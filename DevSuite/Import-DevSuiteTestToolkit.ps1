@@ -41,7 +41,9 @@ function Import-DevSuiteTestToolkit {
     )   
     Write-Host "Importing test tool kit into devsuite '$DevSuite' tenant '$Tenant'" -ForegroundColor Green
     $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/importtesttoolkit" -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
+    $devSuiteName = $devSuiteObj.name
+    $route ="vm/$devSuiteName/tenant/$Tenant/importtesttoolkit"
+    $uri = Get-DevSuiteUri -Route $route -Parameter "includeTestLibrariesOnly=$IncludeTestLibrariesOnly&includeTestFrameworkOnly=$IncludeTestFrameworkOnly"
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'
 }
 

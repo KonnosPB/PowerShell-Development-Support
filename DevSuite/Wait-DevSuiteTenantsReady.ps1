@@ -41,7 +41,9 @@ function Wait-DevSuiteTenantsReady {
                 }   
             }
         }      
-        catch {}
+        catch {
+            Write-Debug $_
+        }
         Start-Sleep -Seconds 30
     }    
 

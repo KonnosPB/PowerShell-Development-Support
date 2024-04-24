@@ -99,7 +99,9 @@ function Install-DevSuiteBCAppPackages {
     
     $body = ConvertTo-Json -InputObject $objs
     $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant/$Tenant/bcapps"
+    $devSuiteName = $devSuiteObj.name
+    $route = "vm/$devSuiteName/tenant/$Tenant/bcapps"
+    $uri = Get-DevSuiteUri -Route $route 
     #Start-Job -ScriptBlock {
         Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling
     #}| Out-Null

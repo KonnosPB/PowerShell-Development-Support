@@ -36,7 +36,9 @@ function Get-DevSuiteTenants {
             return $null
         }
 
-        $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant" -Parameter "clearCache=true"
+        $devSuiteName = $devSuiteObj.name
+        $route = "vm/$devSuiteName/tenant"
+        $uri = Get-DevSuiteUri -Route $route -Parameter "clearCache=true"
         $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
         $tenants = $response.Content | ConvertFrom-Json
         foreach ($tenant in $tenants) {
