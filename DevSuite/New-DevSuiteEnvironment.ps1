@@ -24,7 +24,10 @@
         [Parameter(Mandatory = $false)]
         [switch] $SkipMigration,
         [Parameter(Mandatory = $false)]
-        [switch] $SkipCronus
+        [switch] $SkipCronus,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Sandbox", "OnPrem")]
+        [string] $Type = 'Sandbox'
     )
     Write-Host "## Process started ##" -ForegroundColor Green
 
@@ -43,7 +46,11 @@
         }  
     }
 
-    $script:ArtefactUrl = Get-BusinessCentralArtifactUrl -Country "de" -Version $version -Select Latest -Type Sandbox
+    $script:ArtefactUrl = Get-BusinessCentralArtifactUrl -Country "de" -Version $Version -Select Latest -Type $Type
+    if (-not $script:ArtefactUrl){
+        throw "Cannot find artefact url for country 'de', version $version, Select Latest, Type $Type"
+    }
+
     if ($Solution -eq "Medtec") {
         $script:ProjectNo = $Global:Config.DevSuiteMedtecProjectNo
         $script:AzureDevOps = $Global:Config.DevSuiteMedtecAzureDevOps

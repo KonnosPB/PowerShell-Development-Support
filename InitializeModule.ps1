@@ -31,3 +31,39 @@ if (-not $Global:BearerTokenApplicationPath) {
 
 
 $Global:DevSuiteEnvironments = @() 
+
+
+#region Helper Functions
+function ReplaceCDN {
+    Param(
+        [string] $sourceUrl,
+        [switch] $useBlobUrl
+    )
+
+    $bcCDNs = @(
+        @{ "oldCDN" = "bcartifacts.azureedge.net";         "newCDN" = "bcartifacts-exdbf9fwegejdqak.b02.azurefd.net";         "blobUrl" = "bcartifacts.blob.core.windows.net" },
+        @{ "oldCDN" = "bcinsider.azureedge.net";           "newCDN" = "bcinsider-fvh2ekdjecfjd6gk.b02.azurefd.net";           "blobUrl" = "bcinsider.blob.core.windows.net" },
+        @{ "oldCDN" = "bcpublicpreview.azureedge.net";     "newCDN" = "bcpublicpreview-f2ajahg0e2cudpgh.b02.azurefd.net";     "blobUrl" = "bcpublicpreview.blob.core.windows.net" },
+        @{ "oldCDN" = "businesscentralapps.azureedge.net"; "newCDN" = "businesscentralapps-hkdrdkaeangzfydv.b02.azurefd.net"; "blobUrl" = "businesscentralapps.blob.core.windows.net" },
+        @{ "oldCDN" = "bcprivate.azureedge.net";           "newCDN" = "bcprivate-fmdwbsb3ekbkc0bt.b02.azurefd.net";           "blobUrl" = "bcprivate.blob.core.windows.net" }
+    )
+
+    foreach($cdn in $bcCDNs) {
+        $found = $false
+        $cdn.blobUrl, $cdn.newCDN, $cdn.oldCDN | ForEach-Object {
+            if ($sourceUrl.ToLowerInvariant().StartsWith("https://$_/")) {
+                $sourceUrl = "https://$(if($useBlobUrl){$cdn.blobUrl}else{$cdn.newCDN})/$($sourceUrl.Substring($_.Length+9))"
+                $found = $true
+            }
+            if ($sourceUrl -eq $_) {
+                $sourceUrl = "$(if($useBlobUrl){$cdn.blobUrl}else{$cdn.newCDN})"
+                $found = $true
+            }
+        }
+        if ($found) {
+            break
+        }
+    }
+    $sourceUrl
+}
+#endregion

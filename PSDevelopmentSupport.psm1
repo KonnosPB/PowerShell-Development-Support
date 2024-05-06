@@ -41,7 +41,6 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\Start-DevSuite.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Test-DevSuiteStarted.ps1")
 
-
 # DevOps
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsUri.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Invoke-AzureDevOpsWebRequest.ps1")
@@ -63,4 +62,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "Common\New-ReleaseExcelWorksheet.ps1")
 . (Join-Path $PSScriptRoot "Common\Test-PSDevSupportEnvironment.ps1")
 . (Join-Path $PSScriptRoot "Common\Get-BusinessCentralArtifactUrl.ps1")
+. (Join-Path $PSScriptRoot "Common\Update-Modules.ps1")
+. (Join-Path $PSScriptRoot "Common\Update-BCContainerHelperModule.ps1")
+
 

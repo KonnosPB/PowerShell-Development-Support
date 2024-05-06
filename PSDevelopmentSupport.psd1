@@ -81,7 +81,8 @@
     'Start-DevSuite', 'Test-DevSuiteStarted',
     "Get-JiraTicketsFromSolutionVersion", "Get-JiraCompletedTicketsFromSolutionVersion", "Add-JiraTicketsToPullRequests",
     "Get-AzureDevOpsRepositories", "Get-AzureDevOpsMasterBranchPullRequests", "Get-AzureDevOpsPullRequestWorkItems", "Add-AzureDevOpsWorkItemsToJiraTickets",
-    "Test-AzureDevOpsWorkItemMergedIntoDevelop", "New-ReleaseExcelWorksheet", "New-ReleaseOverview", 'Test-PSDevSupportEnvironment', 'Get-DevSuiteBearerToken'
+    "Test-AzureDevOpsWorkItemMergedIntoDevelop", "New-ReleaseExcelWorksheet", "New-ReleaseOverview", 'Test-PSDevSupportEnvironment', 'Get-DevSuiteBearerToken',
+    "Update-Modules", "Update-BCContainerHelperModule"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = '*'
@@ -120,7 +121,8 @@
         "Jira\Add-JiraTicketsToPullRequests.ps1", "Jira\Add-JiraTicketsToPullRequests.ps1", 
         "Common\New-ReleaseOverview.ps1", "Common\Test-PSDevSupportEnvironment.ps1", "Common\New-ReleaseExcelWorksheet.ps1",
         "Common\Get-BusinessCentralArtifactUrl.ps1",
-        "DevSuite\Start-DevSuite.ps1", "DevSuite\Test-DevSuiteStarted.ps1"
+        "DevSuite\Start-DevSuite.ps1", "DevSuite\Test-DevSuiteStarted.ps1",
+        "Common\Update-Modules.ps1", "Common\Update-BCContainerHelperModule.ps1"
          )
     
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.

@@ -105,7 +105,11 @@ function New-DevSuite {
 
     $uri = Get-DevSuiteUri -Route 'vm'
     #Start-Job -ScriptBlock {
-        Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
+
+    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method POST  -Body $jsonObject
+    if (-not ($response.StatusCode -ge 200 -and $response.StatusCode -lt 300)) {        
+        throw "Error occured with $response.StatusCode $($script:result.StatusDescription) $($script:result.StatusDescription)"        
+    }
     #} | Out-Null
 
     # Startzeit festlegen

@@ -23,8 +23,7 @@
  .Parameter storageAccount
   The storageAccount that is being used where artifacts are stored (default is bcartifacts, usually should not be changed).
  .Parameter sasToken
-  The token that for accessing protected Azure Blob Storage. Make sure to set the right storageAccount!
-  Note that Business Central Insider artifacts doesn't require a sasToken after October 1st 2023, you can use the switch -accept_insiderEula to accept the EULA instead.
+  OBSOLETE - sasToken is no longer supported
  .Parameter accept_insiderEula
   Accept the EULA for Business Central Insider artifacts. This is required for using Business Central Insider artifacts without providing a SAS token after October 1st 2023.
  .Example
@@ -42,13 +41,14 @@ function Get-BusinessCentralArtifactUrl {
         [String] $Country = '',
         [String] $Version = '',
         [ValidateSet('Latest', 'First', 'All', 'Closest', 'SecondToLastMajor', 'Current', 'NextMinor', 'NextMajor', 'Daily', 'Weekly')]
-        [String] $Select = 'Latest',
-        [DateTime] $After,
-        [DateTime] $Before,
-        [String] $StorageAccount = '',
-        [String] $SasToken = '',
-        [switch] $Accept_InsiderEula,
-        [switch] $DoNotCheckPlatform
+        [String] $select = 'Latest',
+        [DateTime] $after,
+        [DateTime] $before,
+        [String] $storageAccount = '',
+        [Obsolete("sasToken is no longer supported")]
+        [String] $sasToken = '',
+        [switch] $accept_insiderEula,
+        [switch] $doNotCheckPlatform
     )
 
     if ($Type -eq "OnPrem") {
@@ -133,35 +133,16 @@ function Get-BusinessCentralArtifactUrl {
             $StorageAccount = 'bcartifacts'
         }
 
-        if (-not $StorageAccount.Contains('.')) {
-            $StorageAccount += ".azureedge.net"
+        if (-not $storageAccount.Contains('.')) {
+            $storageAccount += ".blob.core.windows.net"
         }
-        $BaseUrl = "https://$StorageAccount/$($Type.ToLowerInvariant())/"
-        $StorageAccount = $StorageAccount -replace ".azureedge.net", ".blob.core.windows.net"
+        $BaseUrl = ReplaceCDN -sourceUrl "https://$storageAccount/$($Type.ToLowerInvariant())/" -useBlobUrl:($bcContainerHelperConfig.DoNotUseCdnForArtifacts)
+        $storageAccount = ReplaceCDN -sourceUrl $storageAccount -useBlobUrl
 
-        if ($StorageAccount -eq 'bcinsider.blob.core.windows.net') {
-            if (!$accept_insiderEULA) {
-                if ($SasToken) {
-                    Write-Host -ForegroundColor Yellow "After October 1st 2023, you can specify -accept_insiderEula to accept the insider EULA (https://go.microsoft.com/fwlink/?linkid=2245051) for Business Central Insider artifacts instead of providing a SAS token."
-                }
-                else {
-                    throw "You need to accept the insider EULA (https://go.microsoft.com/fwlink/?linkid=2245051) by specifying -accept_insiderEula or by providing a SAS token to get access to insider builds"
-                }
-            }
+        if ($storageAccount -eq 'bcinsider.blob.core.windows.net' -and !$accept_insiderEULA) {
+            throw "You need to accept the insider EULA (https://go.microsoft.com/fwlink/?linkid=2245051) by specifying -accept_insiderEula or by providing a SAS token to get access to insider builds"
         }
-
-        $GetListUrl = "https://$StorageAccount/$($Type.ToLowerInvariant())/"
-
-        if ($bcContainerHelperConfig.DoNotUseCdnForArtifacts) {
-            $BaseUrl = $GetListUrl
-        }
-
-        if (!([string]::IsNullOrEmpty($SasToken))) {
-            $GetListUrl += $SasToken + "&comp=list&restype=container"
-        }
-        else {
-            $GetListUrl += "?comp=list&restype=container"
-        }
+        $GetListUrl = "https://$storageAccount/$($Type.ToLowerInvariant())/?comp=list&restype=container"
     
         $upMajorFilter = ''
         $upVersionFilter = ''
@@ -194,114 +175,90 @@ function Get-BusinessCentralArtifactUrl {
             $upVersionFilter = $Version.Substring($Version.Length).TrimStart('.')
         }
 
-        #if ($bcContainerHelperConfig.ArtifactsFeedOrganizationAndProject) {
-        if ($false) {
-            $feedApiUrl = "https://feeds.dev.azure.com/$($bcContainerHelperConfig.ArtifactsFeedOrganizationAndProject)/_apis/packaging/feeds/$($StorageAccount.Split('.')[0])"
-            $query = "&packageNameQuery=$Type"
-            if ($Country) {
-                $query += ".$Country"
-                if ($upMajorFilter) {
-                    $query += ".$upMajorFilter"
-                }
+        $Artifacts = @()
+        $nextMarker = ''
+        $currentMarker = ''
+        $downloadAttempt = 1
+        $downloadRetryAttempts = 10
+        do {
+            if ($currentMarker -ne $nextMarker)
+            {
+                $currentMarker = $nextMarker
+                $downloadAttempt = 1
             }
-            # Universal packages only supports semantic version numbers (3 digits)
-            # Since Business Central artifact version numbers uses 4 digits, we name the packages: "type.country.major" and the version number is then "minor.build.revision"
-            $result = invoke-restmethod -UseBasicParsing -Uri "$feedApiUrl/packages?api-version=7.0$query&includeAllVersions=$(($Select -ne 'latest').ToString().ToLowerInvariant())"
-            $Artifacts = @($result.value | ForEach-Object {
-                    # package name is type.country.major
-                    $null, $Country, $major = $_.name.Split('.')
-                    if (!$upMajorFilter -or $upMajorFilter -eq $major) {
-                        $_.versions | Where-Object { (!$upVersionFilter) -or ($_.version.StartsWith($upVersionFilter)) } | ForEach-Object {
-                            # version number is minor.build.revision
-                            return "$major.$($_.version)/$Country"
-                        }
-                    }
-                })
-        }
-        else 
-        {
-            $Artifacts = @()
-            $nextMarker = ''
-            $currentMarker = ''
-            $downloadAttempt = 1
-            $downloadRetryAttempts = 10
-            do {
-                if ($currentMarker -ne $nextMarker) {
-                    $currentMarker = $nextMarker
-                    $downloadAttempt = 1
+            Write-Verbose "Download String $GetListUrl$nextMarker"
+            try
+            {
+                $Response = Invoke-RestMethod -UseBasicParsing -ContentType "application/json; charset=UTF8" -Uri "$GetListUrl$nextMarker"
+                if (([int]$Response[0]) -eq 239 -and ([int]$Response[1]) -eq 187 -and ([int]$Response[2]) -eq 191) {
+                    # Remove UTF8 BOM
+                    $response = $response.Substring(3)
                 }
-                Write-Verbose "Download String $GetListUrl$nextMarker"
-                try {
-                    $Response = Invoke-RestMethod -UseBasicParsing -ContentType "application/json; charset=UTF8" -Uri "$GetListUrl$nextMarker"
-                    if (([int]$Response[0]) -eq 239 -and ([int]$Response[1]) -eq 187 -and ([int]$Response[2]) -eq 191) {
-                        # Remove UTF8 BOM
-                        $response = $response.Substring(3)
-                    }
-                    if (([int]$Response[0]) -eq 65279) {
-                        # Remove Unicode BOM (PowerShell 7.4)
-                        $response = $response.Substring(1)
-                    }
-                    $enumerationResults = ([xml]$Response).EnumerationResults
-    
-                    if ($enumerationResults.Blobs) {
-                        if (($After) -or ($Before)) {
-                            $artifacts += $enumerationResults.Blobs.Blob | % {
-                                if ($After) {
-                                    $blobModifiedDate = [DateTime]::Parse($_.Properties."Last-Modified")
-                                    if ($Before) {
-                                        if ($blobModifiedDate -lt $Before -and $blobModifiedDate -gt $After) {
-                                            $_.Name
-                                        }
-                                    }
-                                    elseif ($blobModifiedDate -gt $After) {
+                if (([int]$Response[0]) -eq 65279) {
+                    # Remove Unicode BOM (PowerShell 7.4)
+                    $response = $response.Substring(1)
+                }
+                $enumerationResults = ([xml]$Response).EnumerationResults
+
+                if ($enumerationResults.Blobs) {
+                    if (($After) -or ($Before)) {
+                        $artifacts += $enumerationResults.Blobs.Blob | % {
+                            if ($after) {
+                                $blobModifiedDate = [DateTime]::Parse($_.Properties."Last-Modified")
+                                if ($before) {
+                                    if ($blobModifiedDate -lt $before -and $blobModifiedDate -gt $after) {
                                         $_.Name
                                     }
                                 }
-                                else {
-                                    $blobModifiedDate = [DateTime]::Parse($_.Properties."Last-Modified")
-                                    if ($blobModifiedDate -lt $Before) {
-                                        $_.Name
-                                    }
+                                elseif ($blobModifiedDate -gt $after) {
+                                    $_.Name
+                                }
+                            }
+                            else {
+                                $blobModifiedDate = [DateTime]::Parse($_.Properties."Last-Modified")
+                                if ($blobModifiedDate -lt $before) {
+                                    $_.Name
                                 }
                             }
                         }
-                        else {
-                            $artifacts += $enumerationResults.Blobs.Blob.Name
-                        }
-                    }
-                    $nextMarker = $enumerationResults.NextMarker
-                    if ($nextMarker) {
-                        $nextMarker = "&marker=$nextMarker"
-                    }
-                }
-                catch {
-                    $downloadAttempt += 1
-                    Write-Host "Error querying artifacts. Error message was $($_.Exception.Message)"
-                    Write-Host
-    
-                    if ($downloadAttempt -le $downloadRetryAttempts) {
-                        Write-Host "Repeating download attempt (" $downloadAttempt.ToString() " of " $downloadRetryAttempts.ToString() ")..."
-                        Write-Host
                     }
                     else {
-                        throw
-                    }                
-                }
-            } while ($nextMarker)
-        }
-
-        if (!([string]::IsNullOrEmpty($Country))) {
-            if (-not $bcContainerHelperConfig.ArtifactsFeedOrganizationAndProject) {
-                # avoid confusion between base and se
-                $countryArtifacts = $Artifacts | Where-Object { $_.EndsWith("/$Country", [System.StringComparison]::InvariantCultureIgnoreCase) -and ($DoNotCheckPlatform -or ($Artifacts.Contains("$($_.Split('/')[0])/platform"))) }
-                if (!$countryArtifacts) {
-                    if (($Type -eq "sandbox") -and ($bcContainerHelperConfig.mapCountryCode.PSObject.Properties.Name -eq $Country)) {
-                        $Country = $bcContainerHelperConfig.mapCountryCode."$Country"
-                        $countryArtifacts = $Artifacts | Where-Object { $_.EndsWith("/$Country", [System.StringComparison]::InvariantCultureIgnoreCase) -and ($DoNotCheckPlatform -or ($Artifacts.Contains("$($_.Split('/')[0])/platform"))) }
+                        $artifacts += $enumerationResults.Blobs.Blob.Name
                     }
                 }
-                $Artifacts = $countryArtifacts
+                $nextMarker = $enumerationResults.NextMarker
+                if ($nextMarker) {
+                    $nextMarker = "&marker=$nextMarker"
+                }
             }
+            catch
+            {
+                $downloadAttempt += 1
+                Write-Host "Error querying artifacts. Error message was $($_.Exception.Message)"
+                Write-Host
+
+                if ($downloadAttempt -le $downloadRetryAttempts)
+                {
+                    Write-Host "Repeating download attempt (" $downloadAttempt.ToString() " of " $downloadRetryAttempts.ToString() ")..."
+                    Write-Host
+                }
+                else
+                {
+                    throw
+                }                
+            }
+        } while ($nextMarker)
+
+        if (!([string]::IsNullOrEmpty($country))) {
+            # avoid confusion between base and se
+            $countryArtifacts = $Artifacts | Where-Object { $_.EndsWith("/$country", [System.StringComparison]::InvariantCultureIgnoreCase) -and ($doNotCheckPlatform -or ($Artifacts.Contains("$($_.Split('/')[0])/platform"))) }
+            if (!$countryArtifacts) {
+                if (($type -eq "sandbox") -and ($bcContainerHelperConfig.mapCountryCode.PSObject.Properties.Name -eq $country)) {
+                    $country = $bcContainerHelperConfig.mapCountryCode."$country"
+                    $countryArtifacts = $Artifacts | Where-Object { $_.EndsWith("/$country", [System.StringComparison]::InvariantCultureIgnoreCase) -and ($doNotCheckPlatform -or ($Artifacts.Contains("$($_.Split('/')[0])/platform"))) }
+                }
+            }
+            $Artifacts = $countryArtifacts
         }
         else {
             $Artifacts = $Artifacts | Where-Object { !($_.EndsWith("/platform", [System.StringComparison]::InvariantCultureIgnoreCase)) }
@@ -310,27 +267,27 @@ function Get-BusinessCentralArtifactUrl {
         switch ($Select) {
             'All' {  
                 $Artifacts = $Artifacts |
-                Sort-Object { [Version]($_.Split('/')[0]) }
+                    Sort-Object { [Version]($_.Split('/')[0]) }
             }
             'Latest' { 
                 $Artifacts = $Artifacts |
-                Sort-Object { [Version]($_.Split('/')[0]) } |
-                Select-Object -Last 1
+                    Sort-Object { [Version]($_.Split('/')[0]) } |
+                    Select-Object -Last 1
             }
             'First' { 
                 $Artifacts = $Artifacts |
-                Sort-Object { [Version]($_.Split('/')[0]) } |
-                Select-Object -First 1
+                    Sort-Object { [Version]($_.Split('/')[0]) } |
+                    Select-Object -First 1
             }
             'SecondToLastMajor' { 
                 $Artifacts = $Artifacts |
-                Sort-Object -Descending { [Version]($_.Split('/')[0]) }
+                    Sort-Object -Descending { [Version]($_.Split('/')[0]) }
                 $latest = $Artifacts | Select-Object -First 1
                 if ($latest) {
                     $latestversion = [Version]($latest.Split('/')[0])
                     $Artifacts = $Artifacts |
-                    Where-Object { ([Version]($_.Split('/')[0])).Major -ne $latestversion.Major } |
-                    Select-Object -First 1
+                        Where-Object { ([Version]($_.Split('/')[0])).Major -ne $latestversion.Major } |
+                        Select-Object -First 1
                 }
                 else {
                     $Artifacts = @()
@@ -338,10 +295,10 @@ function Get-BusinessCentralArtifactUrl {
             }
             'Closest' {
                 $Artifacts = $Artifacts |
-                Sort-Object { [Version]($_.Split('/')[0]) }
+                    Sort-Object { [Version]($_.Split('/')[0]) }
                 $closest = $Artifacts |
-                Where-Object { [Version]($_.Split('/')[0]) -ge $closestToVersion } |
-                Select-Object -First 1
+                    Where-Object { [Version]($_.Split('/')[0]) -ge $closestToVersion } |
+                    Select-Object -First 1
                 if (-not $closest) {
                     $closest = $Artifacts | Select-Object -Last 1
                 }
