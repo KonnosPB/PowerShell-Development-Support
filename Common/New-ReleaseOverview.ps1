@@ -49,10 +49,11 @@ function New-ReleaseOverview {
     Add-AzureDevOpsWorkItemsToJiraTickets -AzureDevOpsProject $dProjectName `
         -JiraTickets  $jiraTickets `
         -AzureDevOpsToken $AzureDevOpsToken `
-        -AzureDevOpsPullRequestWorkItems $workItems
+        -AzureDevOpsPullRequestWorkItems $workItems    
 
     Test-AzureDevOpsWorkItemMergedIntoDevelop  -AzureDevOpsProject $dProjectName `
         -AzureDevOpsPullRequestWorkItems $workItems `
+        -JiraTickets $jiraTickets `
         -AzureDevOpsToken $AzureDevOpsToken 
 
     New-ReleaseExcelWorksheet -AzureDevOpsProject $dProjectName `

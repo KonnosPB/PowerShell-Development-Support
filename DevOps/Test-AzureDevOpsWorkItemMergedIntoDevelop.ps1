@@ -29,6 +29,8 @@ function Test-AzureDevOpsWorkItemMergedIntoDevelop {
         [Parameter(Mandatory = $true)]
         [string] $AzureDevOpsToken,
         [Parameter(Mandatory = $true)]
+        [PSCustomObject[]] $JiraTickets, 
+        [Parameter(Mandatory = $true)]
         [PSCustomObject[]] $AzureDevOpsPullRequestWorkItems
     )
 
@@ -60,7 +62,7 @@ function Test-AzureDevOpsWorkItemMergedIntoDevelop {
         }                
     }
 
-    foreach ($jiraTickets in $script:jiraTickets) {    
+    foreach ($jiraTickets in $JiraTickets) {    
         if (-not $jiraTickets.devopsWorkItem) {
             continue
         }
