@@ -46,6 +46,11 @@ function New-ReleaseOverview {
         -Version $JiraSolutionVersion `
         -JiraApiToken $JiraApiToken
 
+    Add-AzureDevOpsWorkItemsToJiraTickets -AzureDevOpsProject $dProjectName `
+        -JiraTickets  $jiraTickets `
+        -AzureDevOpsToken $AzureDevOpsToken `
+        -AzureDevOpsPullRequestWorkItems $workItems
+
     Test-AzureDevOpsWorkItemMergedIntoDevelop  -AzureDevOpsProject $dProjectName `
         -AzureDevOpsPullRequestWorkItems $workItems `
         -AzureDevOpsToken $AzureDevOpsToken 

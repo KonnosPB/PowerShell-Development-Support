@@ -57,7 +57,7 @@ function Add-AzureDevOpsWorkItemsToJiraTickets() {
                     continue
                 }                
                 $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/wit/workitems/$($devopsWorkItem.Id)" -Parameter '$expand=relations&api-version=6.0'
-                $workItemResponse = Invoke-WebRequest -Uri $uri -Method Get -SkipHttpErrorCheck 
+                $workItemResponse = Invoke-AzureDevOpsWebRequest -Uri $uri -Method Get -AzureDevOpsToken $AzureDevOpsToken
                 if ($workItemResponse.StatusCode -ne 200) {
                     Write-Error "Add-AzureDevOpsWorkItemsToJiraTickets for work item $($wi.Id) failed with status code: $($pullRequestWorkItem.StatusCode) $($pullRequestWorkItem.StatusDescription)" 
                     exit
