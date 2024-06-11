@@ -116,7 +116,7 @@
     }
 
     # Install License
-    Import-DevSuiteLicense -DevSuite $NewDevSuite -LicensePath $LicensePath
+    Import-DevSuiteLicense -DevSuite $NewDevSuite -Path $LicensePath
 
     # Installation App in test-Tenant
     Install-DevSuiteBCAppPackages `
