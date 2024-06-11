@@ -1,19 +1,20 @@
 @echo off
 setlocal
 
-:: Set the source and target directories
-set "sourceDir=%~dp0\..\PSDevelopmentSupport"
-set "targetDir=%USERPROFILE%\OneDrive - KUMAVISION AG\Dokumente\WindowsPowerShell\Modules\PSDevelopmentSupport"
+REM Setze den Quell- und Zielpfad
+set "SOURCE_DIR=."
+set "TARGET_DIR=%USERPROFILE%\OneDrive - KUMAVISION AG\Dokumente\PowerShell\Modules\PSDevelopmentSupport"
 
-:: Remove the target directory if it exists
-if exist "%targetDir%" (
-    rd /s /q "%targetDir%"
+REM Überprüfe, ob das Zielverzeichnis existiert, und erstelle es falls notwendig
+if not exist "%TARGET_DIR%" (
+    echo Erstelle das Zielverzeichnis: %TARGET_DIR%
+    mkdir "%TARGET_DIR%"
 )
 
-:: Create the target directory if it doesn't exist
-mkdir "%targetDir%"
+REM Kopiere die Dateien und ersetze vorhandene Dateien
+echo Kopiere Dateien von %SOURCE_DIR% nach %TARGET_DIR%
+xcopy "%SOURCE_DIR%\*" "%TARGET_DIR%\" /E /H /Y
 
-:: Copy the PowerShell module
-xcopy /E /I /Y "%sourceDir%" "%targetDir%"
-
+echo PowerShell-Modul wurde erfolgreich installiert/aktualisiert.
 endlocal
+pause
