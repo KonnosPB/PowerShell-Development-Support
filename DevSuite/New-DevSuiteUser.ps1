@@ -13,7 +13,7 @@ function New-DevSuiteUser {
 
     $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
     $devSuiteName = $devSuiteObj.name
-    $route = "vm/$devSuiteObj/tenant/$Tenant/user/$UserName"
+    $route = "vm/$devSuiteName/tenant/$Tenant/user/$UserName"
     $uri = Get-DevSuiteUri -Route $route
     Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' 
 }
