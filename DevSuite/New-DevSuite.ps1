@@ -77,7 +77,7 @@ function New-DevSuite {
         [Parameter(Mandatory = $true)]
         [string] $KumaTarget,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 120
+        [int] $TimeoutMinutes = 180
     )
     #Check if devsuite already exist
     $newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $ProjectDescription

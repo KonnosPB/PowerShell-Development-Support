@@ -14,7 +14,7 @@ function Invoke-DevSuiteMigrate {
         [Parameter(Mandatory = $false)]
         [string] $DestinationTenant = $null,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 60
+        [int] $TimeoutMinutes = 120
     )      
 
     $sourceTenantObj = Get-DevSuiteTenant -DevSuite $SourceDevSuite -Tenant $SourceTenant

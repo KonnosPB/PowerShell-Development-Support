@@ -33,8 +33,8 @@
     Description          = 'PowerShell module, which makes it easier to work with KUMA environments.'
     
     # Minimum version of the Windows PowerShell engine required by this module
-    #PowerShellVersion    = '7.4.1'
-    PowerShellVersion    = '5.0.0'
+#    PowerShellVersion    = '7.4.2'
+     PowerShellVersion    = '5.1.0'
     
     # Name of the Windows PowerShell host required by this module
     # PowerShellHostName = ''
@@ -114,8 +114,7 @@
         "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1", "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1", "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1", 
         "DevSuite\Import-DevSuiteLicense.ps1", "DevSuite\Invoke-DevSuiteCopy.ps1", "DevSuite\New-DevSuiteUser.ps1", "DevSuite\Import-DevSuiteTestToolkit.ps1", 
         "DevOps\Get-AzureDevOpsUri.ps1", "DevOps\Invoke-AzureDevOpsWebRequest.ps1", "DevOps\Get-AzureDevOpsRepositories.ps1", 
-        "DevOps\Get-DevSuiteBearerToken.ps1"
-        "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1", "DevOps\Add-AzureDevOpsWorkItemsToJiraTickets.ps1",
+        "DevSuite\Get-DevSuiteBearerToken.ps1", "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1", "DevOps\Add-AzureDevOpsWorkItemsToJiraTickets.ps1",
         "DevOps\Test-AzureDevOpsWorkItemMergedIntoDevelop.ps1",
         "Jira\Get-JiraUri.ps1", "Jira\Invoke-JiraWebRequest.ps1", "Jira\Get-JiraTicketsFromSolutionVersion.ps1", "Jira\Get-JiraCompletedTicketsFromSolutionVersion.ps1", 
         "Jira\Add-JiraTicketsToPullRequests.ps1", "Jira\Add-JiraTicketsToPullRequests.ps1", 
