@@ -15,7 +15,7 @@ function New-DevSuiteUser {
     $devSuiteName = $devSuiteObj.name
     $route = "vm/$devSuiteName/tenant/$Tenant/user/$UserName"
     $uri = Get-DevSuiteUri -Route $route
-    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST' 
+    Invoke-DevSuiteWebRequest -Uri $uri -Method 'POST'  | Out-Null
 }
 
 Export-ModuleMember -Function New-DevSuiteUser

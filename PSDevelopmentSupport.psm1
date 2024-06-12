@@ -64,5 +64,6 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "Common\Get-BusinessCentralArtifactUrl.ps1")
 . (Join-Path $PSScriptRoot "Common\Update-Modules.ps1")
 . (Join-Path $PSScriptRoot "Common\Update-BCContainerHelperModule.ps1")
+. (Join-Path $PSScriptRoot "Common\Get-PSDevelopmentConfig.ps1")
 
 

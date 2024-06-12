@@ -11,9 +11,9 @@ if not exist "%TARGET_DIR%" (
     mkdir "%TARGET_DIR%"
 )
 
-REM Kopiere die Dateien und ersetze vorhandene Dateien
+REM Kopiere die Dateien und ersetze vorhandene Dateien, schließe das .git-Verzeichnis aus
 echo Kopiere Dateien von %SOURCE_DIR% nach %TARGET_DIR%
-xcopy "%SOURCE_DIR%\*" "%TARGET_DIR%\" /E /H /Y
+robocopy "%SOURCE_DIR%" "%TARGET_DIR%" /E /XD ".git"
 
 echo PowerShell-Modul wurde erfolgreich installiert/aktualisiert.
 endlocal

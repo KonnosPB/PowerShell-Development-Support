@@ -12,7 +12,7 @@
     RootModule           = 'PSDevelopmentSupport.psm1'
     
     # Version number of this module.
-    ModuleVersion        = '0.4.0'
+    ModuleVersion        = '0.4.5'
     
     # Supported PSEditions
     CompatiblePSEditions = 'Core', 'Desktop'
@@ -79,6 +79,7 @@
     'Get-DevSuitePublishedBCAppPackages', 'Import-DevSuiteLicense', 'Invoke-DevSuiteCopy', 
     'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', 
     'Start-DevSuite', 'Test-DevSuiteStarted',
+    'Get-PSDevelopmentConfig',
     "Get-JiraTicketsFromSolutionVersion", "Get-JiraCompletedTicketsFromSolutionVersion", "Add-JiraTicketsToPullRequests",
     "Get-AzureDevOpsRepositories", "Get-AzureDevOpsMasterBranchPullRequests", "Get-AzureDevOpsPullRequestWorkItems", "Add-AzureDevOpsWorkItemsToJiraTickets",
     "Test-AzureDevOpsWorkItemMergedIntoDevelop", "New-ReleaseExcelWorksheet", "New-ReleaseOverview", 'Test-PSDevSupportEnvironment', 'Get-DevSuiteBearerToken',
@@ -121,7 +122,7 @@
         "Common\New-ReleaseOverview.ps1", "Common\Test-PSDevSupportEnvironment.ps1", "Common\New-ReleaseExcelWorksheet.ps1",
         "Common\Get-BusinessCentralArtifactUrl.ps1",
         "DevSuite\Start-DevSuite.ps1", "DevSuite\Test-DevSuiteStarted.ps1",
-        "Common\Update-Modules.ps1", "Common\Update-BCContainerHelperModule.ps1"
+        "Common\Update-Modules.ps1", "Common\Update-BCContainerHelperModule.ps1", "Common\Get-PSDevelopmentConfig.ps1"
          )
     
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.

@@ -20,6 +20,9 @@ This parameter is optional, with a default value of 'application/json'. It speci
 .PARAMETER SkipErrorHandling
 This parameter is optional. If specified, the function will not throw an exception if the HTTP response status code is not in the range 200-299.
 
+.PARAMETER SuppressOutput
+This parameter is optional. If specified, the function will suppress its output.
+
 .EXAMPLE
 Invoke-DevSuiteWebRequest -Uri "http://example.com" -Method "GET"
 
@@ -42,7 +45,7 @@ function Invoke-DevSuiteWebRequest {
         [Parameter(Mandatory = $false)]       
         [string] $ContentType = "application/json",
         [Parameter(Mandatory = $false)]
-        [switch] $SkipErrorHandling        
+        [switch] $SkipErrorHandling
     )
 
     $bearerToken = Get-DevSuiteBearerToken
@@ -59,15 +62,15 @@ function Invoke-DevSuiteWebRequest {
     if ($Body) {
         #$authHeaders.Add("Content-Type", $ContentType)
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType -PassThru
     }
     else {
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  
         $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders
     }      
     
-    if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {        
-        return($script:result);
+    if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {                
+        return $script:result        
     }
     else {
         if (!$SkipErrorHandling) {

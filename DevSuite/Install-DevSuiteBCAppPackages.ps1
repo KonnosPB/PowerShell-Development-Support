@@ -103,7 +103,7 @@ function Install-DevSuiteBCAppPackages {
     $route = "vm/$devSuiteName/tenant/$Tenant/bcapps"
     $uri = Get-DevSuiteUri -Route $route 
     #Start-Job -ScriptBlock {
-        Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling
+        Invoke-DevSuiteWebRequest -Uri $uri -Method PATCH -Body $body -SkipErrorHandling | Out-Null
     #}| Out-Null
         
     # Startzeit festlegen
