@@ -65,7 +65,7 @@ function Invoke-DevSuiteMigrate {
             Write-Host "Tenant '$DestinationDevSuite'copied and mounted successfully into '$DestinationTenant' from devsuite '$SourceDevSuite' tenant '$SourceTenant'" -ForegroundColor Green                
             return $tenant          
         }    
-        Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 60
     }    
     throw "Timeout migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationDevSuite'!"
 }

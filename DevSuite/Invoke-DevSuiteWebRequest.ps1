@@ -62,7 +62,7 @@ function Invoke-DevSuiteWebRequest {
     if ($Body) {
         #$authHeaders.Add("Content-Type", $ContentType)
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
-        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType -PassThru
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType
     }
     else {
         Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  

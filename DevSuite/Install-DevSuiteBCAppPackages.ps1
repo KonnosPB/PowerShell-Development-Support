@@ -121,7 +121,7 @@ function Install-DevSuiteBCAppPackages {
             Write-Host "App $publishedApp successfully published" -ForegroundColor Green
             return $publishedApp
         }        
-        Start-Sleep -Seconds 10
+        Start-Sleep -Seconds 60
     }    
     throw "Timeout publishing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'"
 }

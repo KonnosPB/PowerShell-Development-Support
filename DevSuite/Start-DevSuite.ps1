@@ -34,7 +34,7 @@ function Start-DevSuite {
             Write-Host "Tenants of devsuite '$DevSuite' also ready" -ForegroundColor Green         
             return $devSuiteObj            
         }    
-        Start-Sleep -Seconds 15
+        Start-Sleep -Seconds 60
     }    
     
     throw "Timeout starting devsuite '$DevSuite'!"

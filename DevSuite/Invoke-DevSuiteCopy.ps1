@@ -64,7 +64,7 @@ function Invoke-DevSuiteCopy {
             Write-Host "Tenant $DestinationTenant successfully copied and mounted" -ForegroundColor Green        
             return $tenant           
         }    
-        Start-Sleep -Seconds 20
+        Start-Sleep -Seconds 60
     }    
     throw "Timeout migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationDevSuite'!"
 }

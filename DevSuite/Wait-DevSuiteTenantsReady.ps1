@@ -44,7 +44,7 @@ function Wait-DevSuiteTenantsReady {
         catch {
             Write-Debug $_
         }
-        Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 180
     }    
 
     throw "Wait-DevSuiteTenantsReady timeout"

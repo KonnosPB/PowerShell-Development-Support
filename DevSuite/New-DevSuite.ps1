@@ -127,7 +127,7 @@ function New-DevSuite {
             Write-Host "Tenants of devsuite '$ProjectDescription' also ready" -ForegroundColor Green         
             return $devSuite            
         }    
-        Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 60
     }    
 
     throw "Timeout creating new devsuite '$ProjectDescription'!"
