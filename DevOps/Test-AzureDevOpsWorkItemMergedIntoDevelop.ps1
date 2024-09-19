@@ -42,21 +42,27 @@ function Test-AzureDevOpsWorkItemMergedIntoDevelop {
                 $pullRequestUrl = $relation.url
                 $pullRequestId = $pullRequestUrl.Split("%2F")[-1]
 
-                # API-Anforderung senden, um Details zum Pull Request zu erhalten
-                $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/pullrequests/$($pullRequestId)" -Parameter "api-version=6.0"
-                $response = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken
-                if ($response.StatusCode -ne 200) {
-                    Write-Error "Test-AzureDevOpsWorkItemMergedIntoDevelop pull request for $($pullRequestId) failed with status code: $($response.StatusCode) $($response.StatusDescription)" 
+                # API-Anforderung senden, um Details zum Pull Request zu erhalten                
+                try {
+                    $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/pullrequests/$($pullRequestId)" -Parameter "api-version=6.0"
+                    $response = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken
+                    if ($response.StatusCode -ne 200) {
+                        Write-Error "Test-AzureDevOpsWorkItemMergedIntoDevelop pull request for $($pullRequestId) failed with status code: $($response.StatusCode) $($response.StatusDescription)" 
+                    }
+                    $jPullRequestResponse = $response.Content | ConvertFrom-Json   
+                    if ($jPullRequestResponse.status -ne 'completed') {
+                        continue
+                    }
+                    # Zielbranch aus der Antwort extrahieren und ausgeben
+                    $targetBranch = $jPullRequestResponse.targetRefName
+                    if ($targetBranch -eq 'refs/heads/develop') {
+                        $devopsPullRequestWorkItem.MergedIntoDevelop = $true
+                        break
+                    }
                 }
-                $jPullRequestResponse = $response.Content | ConvertFrom-Json   
-                if ($jPullRequestResponse.status -ne 'completed') {
+                catch {
+                    Write-Error "Test-AzureDevOpsWorkItemMergedIntoDevelop pull request for $($pullRequestId) failed $($_)" 
                     continue
-                }
-                # Zielbranch aus der Antwort extrahieren und ausgeben
-                $targetBranch = $jPullRequestResponse.targetRefName
-                if ($targetBranch -eq 'refs/heads/develop') {
-                    $devopsPullRequestWorkItem.MergedIntoDevelop = $true
-                    break
                 }
             }           
         }                
