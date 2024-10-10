@@ -10,7 +10,9 @@ function New-ReleaseOverview {
         [Parameter(Mandatory = $false)]
         [string] $AzureDevOpsToken = $null,
         [Parameter(Mandatory = $false)]
-        [string] $Output = $null
+        [string] $Output = $null,
+        [Parameter(Mandatory = $false)]
+        [string] $Branch = "master"
     )
 
     if (-not $JiraApiToken) {
@@ -33,7 +35,8 @@ function New-ReleaseOverview {
 
     $pullRequests = Get-AzureDevOpsMasterBranchPullRequests -AzureDevOpsProject $dProjectName `
         -AzureDevOpsRepositories $repositories `
-        -AzureDevOpsToken $AzureDevOpsToken
+        -AzureDevOpsToken $AzureDevOpsToken `
+        -Branch $Branch
     
     $workItems = Get-AzureDevOpsPullRequestWorkItems -AzureDevOpsProject $dProjectName `
         -AzureDevOpsPullRequests $pullRequests  `
