@@ -1,34 +1,49 @@
 <#
 .SYNOPSIS
-This function retrieves a list of DevSuite environments using a bearer token.
+This function retrieves all devsuite environments.
 
 .DESCRIPTION
-The Get-DevSuiteEnvironments function uses the BearerToken parameter to authenticate and fetch a list of available DevSuite environments. This function also handles errors and returns an empty array if any exception is encountered.
+The Get-DevSuiteEnvironments function makes a GET request to the specified DevSuite URI and retrieves all the environments. The function uses the Get-DevSuiteUri function to construct the URI and the Invoke-DevSuiteWebRequest function to make the request.
 
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+.PARAMETER
+No parameter is needed for this function.
 
 .EXAMPLE
-Get-DevSuiteEnvironments -BearerToken "1234567890"
+Get-DevSuiteEnvironments
 
-This example retrieves the list of DevSuite environments using the BearerToken 1234567890 for authentication.
+This example demonstrates how to call the function to get all devsuite environments.
 #>
-function Get-DevSuiteEnvironments {
+function Get-DevSuiteEnvironments {   
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
-    )
-    try {
-        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
-        $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET" -BearerToken $BearerToken -SkipErrorHandling
-        if ($result.StatusCode -ne 200) {
-            return false;
+        [Parameter(Mandatory = $false, Position = 0)]
+        [ValidateSet("Healthcare", "Medtec")]        
+        [string] $Solution
+    ) 
+    BEGIN {
+        Write-Debug "Getting all devsuite environments" 
+    }
+
+    PROCESS {              
+        $script:Regex = ".*"
+        if ($Solution -eq "Medtec") {
+            $script:Regex = "(MEDTEC|MTC).*Produkt.*"            
+        }elseif($Solution -eq "Healthcare")  {
+            $script:Regex = "(HC|Healthcare).*Produkt.*"            
         }
-        $jsonDevSuite = $result.Content | ConvertFrom-Json
-        return $jsonDevSuite;        
+
+        $uri = Get-DevSuiteUri -Route "vm" -Parameter "clearCache=false"
+        $result = Invoke-DevSuiteWebRequest -Uri $uri -Method "GET"
+        if ($result.StatusCode -ne 200) {
+            Write-Output $null
+            return
+        }
+        $jsonDevSuites = $result.Content | ConvertFrom-Json 
+        $jsonDevSuites = $jsonDevSuites | Where-Object {$_.projectDescription -match $script:Regex}
+        foreach ($jsonDevSuite in $jsonDevSuites) {                
+            Write-Output $jsonDevSuite
+        }                       
     }
-    catch {
-        return @()
-    }
+    END {}  
 }
 Export-ModuleMember -Function Get-DevSuiteEnvironments
+New-Alias "Get-DevSuites" -Value Get-DevSuiteEnvironment

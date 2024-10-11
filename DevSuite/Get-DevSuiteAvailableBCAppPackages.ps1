@@ -1,33 +1,54 @@
+
 <#
 .SYNOPSIS
-This function fetches all available Business Central App packages from a specified DevSuite.
+Retrieves the available BC app packages from a specified DevSuite.
 
 .DESCRIPTION
-The Get-DevSuiteAvailableBCAppPackages function uses the DevSuite and BearerToken parameters to retrieve a list of all available Business Central App packages from a specified DevSuite. 
+The Get-DevSuiteAvailableBCAppPackages function retrieves the available BC app packages from a specified DevSuite. It is a process that involves calling other functions like Get-DevSuiteEnvironment and Invoke-DevSuiteWebRequest to get the necessary details. The function then outputs the app packages found.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the available Business Central App packages will be fetched.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+This is a mandatory string parameter that specifies the DevSuite from which to retrieve the BC app packages. It has aliases "Name", "Description", and "NameOrDescription" for flexibility.
 
 .EXAMPLE
-Get-DevSuiteAvailableBCAppPackages -DevSuite "DevSuite1" -BearerToken "1234567890"
+Get-DevSuiteAvailableBCAppPackages -DevSuite "DevSuite1"
 
-This example fetches all available Business Central App packages from DevSuite1 using the BearerToken 1234567890 for authentication.
+This command retrieves the BC app packages from the DevSuite named "DevSuite1".
+
+.EXAMPLE
+Get-DevSuiteAvailableBCAppPackages -Name "DevSuite1"
+
+This command retrieves the BC app packages from the DevSuite named "DevSuite1". It uses the alias "Name" for the DevSuite parameter.
+
+.EXAMPLE
+Get-DevSuiteAvailableBCAppPackages -Description "DevSuite for development"
+
+This command retrieves the BC app packages from the DevSuite with the description "DevSuite for development". It uses the alias "Description" for the DevSuite parameter.
 #>
 function Get-DevSuiteAvailableBCAppPackages {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
+    BEGIN {
+        Write-Debug "Getting all app packages infos from devsuite '$DevSuite'"
+    }
 
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/bcpackages"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET' -BearerToken $BearerToken
-    $appPackages = $response.Content | ConvertFrom-Json
-    return $appPackages
+    PROCESS {  
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
+        $devSuiteName = $devSuiteObj.name
+        $route = "vm/$devSuiteName/bcpackages"
+        $uri = Get-DevSuiteUri -Route $route
+        $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
+        $appPackages = $response.Content | ConvertFrom-Json
+        foreach ($appPackage in $appPackages) {
+            Write-Output $appPackage
+        }    
+    }
+    END {}  
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteApps" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuiteAppPackages" -Value Get-DevSuiteAvailableBCAppPackages
+New-Alias "Get-DevSuitePackages" -Value Get-DevSuiteAvailableBCAppPackages

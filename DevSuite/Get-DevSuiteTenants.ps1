@@ -1,37 +1,51 @@
 <#
 .SYNOPSIS
-This function fetches the tenants from a specified DevSuite.
+This function retrieves all tenants from a specific DevSuite.
 
 .DESCRIPTION
-The Get-DevSuiteTenants function uses the DevSuite and BearerToken parameters to retrieve a list of tenants from a specified DevSuite. It first fetches the DevSuite environment object based on the provided DevSuite name and then fetches the tenants associated with that DevSuite environment.
+The Get-DevSuiteTenants function retrieves and outputs the details of all tenants from the specified DevSuite. 
+It first gets the DevSuite environment based on the input parameter and then it invokes a web request to the DevSuite with a specific route. 
+The response is then converted from Json to output the tenants.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the tenants will be fetched.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+This mandatory parameter specifies the name or description of the DevSuite from which to retrieve tenants. 
+It accepts pipeline input and aliases including "Name", "Description", and "NameOrDescription".
 
 .EXAMPLE
-Get-DevSuiteTenants -DevSuite "DevSuite1" -BearerToken "1234567890"
+Get-DevSuiteTenants -DevSuite "Dev Suite 1"
+This example retrieves all tenants from the DevSuite named "Dev Suite 1".
 
-This example fetches the tenants from DevSuite1 using the BearerToken 1234567890 for authentication.
+.EXAMPLE
+"Dev Suite 1" | Get-DevSuiteTenants
+This example retrieves all tenants from the DevSuite named "Dev Suite 1", with the DevSuite name provided via pipeline input.
+
 #>
 function Get-DevSuiteTenants {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
-    $devSuiteObj = Get-DevSuiteEnvironment -NameOrDescription $DevSuite -BearerToken $BearerToken
-    if (-not $devSuiteObj) {
-        return $null
+    BEGIN {
+        Write-Debug "Getting all tenant infos from devsuite '$DevSuite'" 
     }
 
-    $uri = Get-DevSuiteUri -Route "vm/$($devSuiteObj.name)/tenant" -Parameter "clearCache=true"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET' -BearerToken $BearerToken
-    $tenants = $response.Content | ConvertFrom-Json
-    return $tenants
+    PROCESS {        
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
+        if (-not $devSuiteObj) {
+            return $null
+        }
+
+        $devSuiteName = $devSuiteObj.name
+        $route = "vm/$devSuiteName/tenant"
+        $uri = Get-DevSuiteUri -Route $route -Parameter "clearCache=true"
+        $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
+        $tenants = $response.Content | ConvertFrom-Json
+        foreach ($tenant in $tenants) {
+            Write-Output $tenant
+        }
+    }
+    END {}
 }
 
-Export-ModuleMember -Function Get-DevSuiteTenants2
+Export-ModuleMember -Function Get-DevSuiteTenants

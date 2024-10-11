@@ -28,7 +28,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteTenant.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Invoke-DevSuiteMigrate.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Wait-DevSuiteTenantsReady.ps1")
-. (Join-Path $PSScriptRoot "DevSuite\Install-DevSuiteBCAppPackage.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Install-DevSuiteBCAppPackages.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1")
@@ -36,6 +36,10 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevSuite\Invoke-DevSuiteCopy.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\New-DevSuiteUser.ps1")
 . (Join-Path $PSScriptRoot "DevSuite\Import-DevSuiteTestToolkit.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Get-DevSuiteBearerToken.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\New-DevSuite.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Start-DevSuite.ps1")
+. (Join-Path $PSScriptRoot "DevSuite\Test-DevSuiteStarted.ps1")
 
 # DevOps
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsUri.ps1")
@@ -43,7 +47,7 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsRepositories.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1")
-. (Join-Path $PSScriptRoot "DevOps\Get-AzureDevOpsWorkItemsFromJiraTickets.ps1")
+. (Join-Path $PSScriptRoot "DevOps\Add-AzureDevOpsWorkItemsToJiraTickets.ps1")
 . (Join-Path $PSScriptRoot "DevOps\Test-AzureDevOpsWorkItemMergedIntoDevelop.ps1")
 
 # Jira
@@ -58,4 +62,8 @@ Update-Module Microsoft.Online.SharePoint.PowerShell  -ErrorAction SilentlyConti
 . (Join-Path $PSScriptRoot "Common\New-ReleaseExcelWorksheet.ps1")
 . (Join-Path $PSScriptRoot "Common\Test-PSDevSupportEnvironment.ps1")
 . (Join-Path $PSScriptRoot "Common\Get-BusinessCentralArtifactUrl.ps1")
+. (Join-Path $PSScriptRoot "Common\Update-Modules.ps1")
+. (Join-Path $PSScriptRoot "Common\Update-BCContainerHelperModule.ps1")
+. (Join-Path $PSScriptRoot "Common\Get-PSDevelopmentConfig.ps1")
+
 

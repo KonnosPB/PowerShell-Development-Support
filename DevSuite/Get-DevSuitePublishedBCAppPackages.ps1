@@ -1,37 +1,52 @@
 <#
 .SYNOPSIS
-This function retrieves published Business Central App packages from a specific tenant in a DevSuite.
+This function retrieves the published app packages from a specified dev suite.
 
 .DESCRIPTION
-The Get-DevSuitePublishedBCAppPackages function uses the DevSuite, Tenant, and BearerToken parameters to retrieve a list of published Business Central App packages from a specific tenant in a DevSuite.
+The Get-DevSuitePublishedBCAppPackages function retrieves and outputs the details of all app packages that have been published in the specified dev suite. It invokes a web request to the dev suite and processes the response to extract app package information.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the published Business Central App packages will be retrieved.
+This mandatory parameter specifies the name or description of the dev suite from which to retrieve app packages. It accepts pipeline input and aliases including "Name" and "Description".
 
 .PARAMETER Tenant
-This is a mandatory parameter that specifies the tenant in the DevSuite from which the published Business Central App packages will be retrieved.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+This mandatory parameter specifies the tenant in the dev suite from which to retrieve app packages.
 
 .EXAMPLE
-Get-DevSuitePublishedBCAppPackages -DevSuite "DevSuite1" -Tenant "Tenant1" -BearerToken "1234567890"
+Get-DevSuitePublishedBCAppPackages -DevSuite "Dev Suite 1" -Tenant "Tenant1"
+This example retrieves all published app packages from the dev suite named "Dev Suite 1" for the tenant "Tenant1".
 
-This example retrieves the published Business Central App packages from the tenant "Tenant1" in DevSuite "DevSuite1" using the BearerToken "1234567890" for authentication.
+.EXAMPLE
+"Dev Suite 1" | Get-DevSuitePublishedBCAppPackages -Tenant "Tenant1"
+This example retrieves all published app packages from the dev suite named "Dev Suite 1" for the tenant "Tenant1", with the dev suite name provided via pipeline input.
+
 #>
 function Get-DevSuitePublishedBCAppPackages {
     Param (
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
-        [string] $Tenant,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 1)]
+        [string] $Tenant
     )    
-    $uri = Get-DevSuiteUri -Route "vm/$DevSuite/tenant/$Tenant/appInfo"
-    $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET' -BearerToken $BearerToken
-    $appPackages = $response.Content | ConvertFrom-Json
-    return $appPackages
+    BEGIN {}
+
+    PROCESS {
+        Write-Debug "Getting published app app packages infos from devsuite '$DevSuite'"
+
+        $devSuiteObj = Get-DevSuiteEnvironment -DevSuite $DevSuite
+        $devSuiteName = $devSuiteObj.name
+        $route = "vm/$devSuiteName/tenant/$Tenant/appInfo"
+        $uri = Get-DevSuiteUri -Route $route
+        $response = Invoke-DevSuiteWebRequest -Uri $uri -Method 'GET'
+        $appPackages = $response.Content | ConvertFrom-Json
+        foreach ($appPackage in $appPackages){
+            Write-Output $appPackage
+        }        
+    }
+    END {}
 }
 
 Export-ModuleMember -Function Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedApps" -Value Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedAppPackages" -Value Get-DevSuitePublishedBCAppPackages
+New-Alias "Get-DevSuitePublishedPackages" -Value Get-DevSuitePublishedBCAppPackages

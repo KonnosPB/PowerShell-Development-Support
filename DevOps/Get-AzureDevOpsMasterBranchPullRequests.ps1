@@ -31,21 +31,24 @@ function Get-AzureDevOpsMasterBranchPullRequests {
         [Parameter(Mandatory = $true)]
         [string[]] $AzureDevOpsRepositories,
         [Parameter(Mandatory = $true)]
-        [string] $AzureDevOpsToken
+        [string] $AzureDevOpsToken,
+        [Parameter(Mandatory = $false)]
+        [string] $Branch = "master"
     )
     $result = @()
     foreach ($AzureDevOpsRepository in $AzureDevOpsRepositories) {
         # Get the list of pull requests        
         try {
-            $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/repositories/$AzureDevOpsRepository/pullrequests" -Parameter "searchCriteria.targetRefName=refs/heads/master&searchCriteria.status=active"
+            $uri = Get-AzureDevOpsUri -AzureDevOpsProject $AzureDevOpsProject -Route "_apis/git/repositories/$AzureDevOpsRepository/pullrequests" -Parameter "searchCriteria.targetRefName=refs/heads/$Branch&searchCriteria.status=active"
             $pullRequests = Invoke-AzureDevOpsWebRequest -Uri $uri -Method GET -AzureDevOpsToken $AzureDevOpsToken              
             $jContent = $pullRequests.Content | ConvertFrom-Json
             foreach ($pullRequest in $jContent.value) {
-                $pullRequest.repository = $repository
+                $pullRequest.repository = $AzureDevOpsRepository
                 $result += $pullRequest                
             }
         }
-        catch {            
+        catch {    
+            Write-Warning $_        
         }        
     }
     return $result

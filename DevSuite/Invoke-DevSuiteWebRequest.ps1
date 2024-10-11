@@ -1,32 +1,37 @@
 <#
 .SYNOPSIS
-This function makes a web request to a specified URI using the specified method and authentication headers.
+This function is used to make web requests to a specified Uri with a specific HTTP method.
 
 .DESCRIPTION
-The Invoke-DevSuiteWebRequest function makes a web request to a specified URI using the specified HTTP method (GET, POST, or PATCH) and authentication headers. If a body is supplied, the function includes it in the request and sets the Content-Type header to 'application/json'. The function writes the status of the request to the host and returns the response if the status code is between 200 and 300. If the status code is outside this range and the SkipErrorHandling switch is not included, the function throws an exception.
+The Invoke-DevSuiteWebRequest function is a wrapper for the Invoke-WebRequest cmdlet in PowerShell. It adds additional functionality such as bearer token authorization, content type specification, error handling, and logging. This function will throw an exception if the HTTP response status code is not in the range 200-299, unless the SkipErrorHandling switch is specified.
 
 .PARAMETER Uri
-The Uri parameter is a mandatory string parameter that specifies the URI to which the web request is made.
+This parameter is mandatory. It specifies the Uri to which the web request should be made.
 
 .PARAMETER Method
-The Method parameter is a mandatory string parameter that specifies the HTTP method used for the web request. It must be one of the following values: GET, POST, PATCH.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token used in the Authorization header of the web request.
+This parameter is mandatory. It specifies the HTTP method (GET, POST, PATCH) for the web request.
 
 .PARAMETER Body
-The Body parameter is an optional object parameter that specifies the body of the web request. If supplied, the function includes the body in the request and sets the Content-Type header to 'application/json'.
+This parameter is optional. It specifies the body of the web request, if applicable.
 
 .PARAMETER ContentType
-The ContentType parameter is an optional string parameter that specifies the value of the Content-Type header in the web request. The default value is 'application/json'.
+This parameter is optional, with a default value of 'application/json'. It specifies the content type of the web request body.
 
 .PARAMETER SkipErrorHandling
-The SkipErrorHandling parameter is an optional switch parameter that, when included, prevents the function from throwing an exception when the status code of the response is outside the range 200-300.
+This parameter is optional. If specified, the function will not throw an exception if the HTTP response status code is not in the range 200-299.
+
+.PARAMETER SuppressOutput
+This parameter is optional. If specified, the function will suppress its output.
 
 .EXAMPLE
-Invoke-DevSuiteWebRequest -Uri "https://api.example.com" -Method "GET" -BearerToken "abc123"
+Invoke-DevSuiteWebRequest -Uri "http://example.com" -Method "GET"
 
-This example makes a GET request to "https://api.example.com" using the bearer token "abc123".
+This example makes a GET request to http://example.com.
+
+.EXAMPLE
+Invoke-DevSuiteWebRequest -Uri "http://example.com" -Method "POST" -Body @{name="example"}
+
+This example makes a POST request to http://example.com with a JSON body containing {"name": "example"}.
 #>
 function Invoke-DevSuiteWebRequest {
     Param (
@@ -35,39 +40,42 @@ function Invoke-DevSuiteWebRequest {
         [Parameter(Mandatory = $true)]
         [ValidateSet("GET", "POST", "PATCH")]
         [string] $Method,      
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken,
         [Parameter(Mandatory = $false)]
         [object] $Body,
+        [Parameter(Mandatory = $false)]       
+        [string] $ContentType = "application/json",
         [Parameter(Mandatory = $false)]
-        [string] $ContentType = 'application/json',
-        [Parameter(Mandatory = $false)]
-        [switch] $SkipErrorHandling        
+        [switch] $SkipErrorHandling
     )
 
+    $bearerToken = Get-DevSuiteBearerToken
+
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
-    $authHeaders.Add("Authorization", $BearerToken)
+    $authHeaders.Add("Authorization", $bearerToken)
+    #$authHeaders.Add("Connection", 'keep-alive')
+    if (-not $ContentType){
+        $ContentType = "application/json"
+    }
 
     $callingCommandFile = Split-Path $MyInvocation.PSCommandPath -Leaf | ForEach-Object { $_ -replace '\.[^.]+$', '' }
 
     if ($Body) {
-        $authHeaders.Add("Content-Type", $ContentType)
-        Write-Host "$callingCommandFile : Invoke-DevSuiteWebRequest -Uri $Uri -Method $Method -Body $Body" -NoNewline  
-        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body  
+        #$authHeaders.Add("Content-Type", $ContentType)
+        Write-Debug "$callingCommandFile -Uri $Uri -Method $Method -Body $Body"  
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body -ContentType $ContentType
     }
     else {
-        Write-Host "$callingCommandFile : Invoke-DevSuiteWebRequest -Uri $Uri -Method $Method" -NoNewline  
-        $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders 
+        Write-Debug "$callingCommandFile -Uri $Uri -Method $Method"  
+        $script:result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders
     }      
     
-    if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {
-        Write-Host " ✅"
-        return($result);
+    if ($script:result.StatusCode -ge 200 -and $script:result.StatusCode -lt 300) {                
+        return $script:result        
     }
     else {
-        Write-Host " ❌"
         if (!$SkipErrorHandling) {
-            throw "$($result.StatusCode) $($result.StatusDescription)" 
+            $errorMessage = "Invoke-DevSuiteWebRequest failed with status $($script:result.StatusCode) $($script:result.StatusDescription)"
+            throw $errorMessage  
         }
     }
 }

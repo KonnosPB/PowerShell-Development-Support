@@ -12,7 +12,7 @@
     RootModule           = 'PSDevelopmentSupport.psm1'
     
     # Version number of this module.
-    ModuleVersion        = '0.4.0'
+    ModuleVersion        = '0.4.5'
     
     # Supported PSEditions
     CompatiblePSEditions = 'Core', 'Desktop'
@@ -33,7 +33,8 @@
     Description          = 'PowerShell module, which makes it easier to work with KUMA environments.'
     
     # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion    = '7.4.1'
+#    PowerShellVersion    = '7.4.2'
+     PowerShellVersion    = '5.1.0'
     
     # Name of the Windows PowerShell host required by this module
     # PowerShellHostName = ''
@@ -70,16 +71,19 @@
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
     FunctionsToExport    = 'Get-DevSuiteUri', 'Invoke-DevSuiteWebRequest', 'Test-DevSuiteBearerToken', 
-    'Update-DevSuiteBearerToken', 'New-DevSuiteEnvironment', 'Test-DevSuiteEnvironment', 
+    'Update-DevSuiteBearerToken', 'New-DevSuiteEnvironment', 'New-DevSuite', 'Test-DevSuiteEnvironment', 
     'Get-DevSuiteEnvironment', 'Get-DevSuiteEnvironments', 'Wait-DevSuiteTenantsReady', 
     'Test-DevSuiteTenantsMounted', 'Get-DevSuiteTenants', 'Get-DevSuiteTenant', 
-    'Invoke-DevSuiteMigrate', 'Wait-DevSuiteTenantsReady', 'Install-DevSuiteBCAppPackage', 
+    'Invoke-DevSuiteMigrate', 'Wait-DevSuiteTenantsReady', 'Install-DevSuiteBCAppPackages', 
     'Get-DevSuiteAvailableBCAppPackages', 'Get-DevSuiteAvailableBCAppPackage', 'Get-DevSuiteAvailableBCAppPackage', 
     'Get-DevSuitePublishedBCAppPackages', 'Import-DevSuiteLicense', 'Invoke-DevSuiteCopy', 
     'New-DevSuiteUser', 'Import-DevSuiteTestToolkit', 'Get-BusinessCentralArtifactUrl', 
+    'Start-DevSuite', 'Test-DevSuiteStarted',
+    'Get-PSDevelopmentConfig',
     "Get-JiraTicketsFromSolutionVersion", "Get-JiraCompletedTicketsFromSolutionVersion", "Add-JiraTicketsToPullRequests",
-    "Get-AzureDevOpsRepositories", "Get-AzureDevOpsMasterBranchPullRequests", "Get-AzureDevOpsPullRequestWorkItems", "Get-AzureDevOpsWorkItemsFromJiraTickets",
-    "Test-AzureDevOpsWorkItemMergedIntoDevelop", "New-ReleaseExcelWorksheet", "New-ReleaseOverview"
+    "Get-AzureDevOpsRepositories", "Get-AzureDevOpsMasterBranchPullRequests", "Get-AzureDevOpsPullRequestWorkItems", "Add-AzureDevOpsWorkItemsToJiraTickets",
+    "Test-AzureDevOpsWorkItemMergedIntoDevelop", "New-ReleaseExcelWorksheet", "New-ReleaseOverview", 'Test-PSDevSupportEnvironment', 'Get-DevSuiteBearerToken',
+    "Update-Modules", "Update-BCContainerHelperModule"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport      = '*'
@@ -88,7 +92,12 @@
     VariablesToExport    = '*'
     
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    # AliasesToExport = '', ''
+    AliasesToExport = 'Get-DevSuiteApp', "Get-DevSuiteAppPackage", "Get-DevSuitePackage",
+    'Get-DevSuiteApps', "Get-DevSuiteAppPackages", "Get-DevSuitePackages",
+    "Get-DevSuite", 
+    "Get-DevSuites",
+    "Get-DevSuitePublishedApps", "Get-DevSuitePublishedAppPackages", "Get-DevSuitePublishedPackages",
+    "Install-DevSuiteAppPackages", "Install-DevSuiteApps", "Install-DevSuitePackages"
     
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -98,20 +107,23 @@
     
     # List of all files packaged with this module
     FileList             = @("InitializeModule.ps1", "DevSuite\Get-DevSuiteUri.ps1", "DevSuite\Invoke-DevSuiteWebRequest.ps1", 
-        "DevSuite\Test-DevSuiteBearerToken.ps1", "DevSuite\Update-DevSuiteBearerToken.ps1", 
+        "DevSuite\Test-DevSuiteBearerToken.ps1", "DevSuite\Update-DevSuiteBearerToken.ps1",  "DevSuite\New-DevSuite.ps1",
         "DevSuite\New-DevSuiteEnvironment.ps1", "DevSuite\Test-DevSuiteEnvironment.ps1", 
         "DevSuite\Get-DevSuiteEnvironment.ps1", "DevSuite\Get-DevSuiteEnvironments.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", 
         "DevSuite\Test-DevSuiteTenantsMounted.ps1", "DevSuite\Get-DevSuiteTenants.ps1", "DevSuite\Get-DevSuiteTenant.ps1", 
-        "DevSuite\Invoke-DevSuiteMigrate.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", "DevSuite\Install-DevSuiteBCAppPackage.ps1", 
+        "DevSuite\Invoke-DevSuiteMigrate.ps1", "DevSuite\Wait-DevSuiteTenantsReady.ps1", "DevSuite\Install-DevSuiteBCAppPackages.ps1", 
         "DevSuite\Get-DevSuiteAvailableBCAppPackages.ps1", "DevSuite\Get-DevSuiteAvailableBCAppPackage.ps1", "DevSuite\Get-DevSuitePublishedBCAppPackages.ps1", 
         "DevSuite\Import-DevSuiteLicense.ps1", "DevSuite\Invoke-DevSuiteCopy.ps1", "DevSuite\New-DevSuiteUser.ps1", "DevSuite\Import-DevSuiteTestToolkit.ps1", 
         "DevOps\Get-AzureDevOpsUri.ps1", "DevOps\Invoke-AzureDevOpsWebRequest.ps1", "DevOps\Get-AzureDevOpsRepositories.ps1", 
-        "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1", "DevOps\Get-AzureDevOpsWorkItemsFromJiraTickets.ps1",
+        "DevSuite\Get-DevSuiteBearerToken.ps1", "DevOps\Get-AzureDevOpsMasterBranchPullRequests.ps1", "DevOps\Get-AzureDevOpsPullRequestWorkItems.ps1", "DevOps\Add-AzureDevOpsWorkItemsToJiraTickets.ps1",
         "DevOps\Test-AzureDevOpsWorkItemMergedIntoDevelop.ps1",
         "Jira\Get-JiraUri.ps1", "Jira\Invoke-JiraWebRequest.ps1", "Jira\Get-JiraTicketsFromSolutionVersion.ps1", "Jira\Get-JiraCompletedTicketsFromSolutionVersion.ps1", 
         "Jira\Add-JiraTicketsToPullRequests.ps1", "Jira\Add-JiraTicketsToPullRequests.ps1", 
         "Common\New-ReleaseOverview.ps1", "Common\Test-PSDevSupportEnvironment.ps1", "Common\New-ReleaseExcelWorksheet.ps1",
-        "Common\Get-BusinessCentralArtifactUrl.ps1" )
+        "Common\Get-BusinessCentralArtifactUrl.ps1",
+        "DevSuite\Start-DevSuite.ps1", "DevSuite\Test-DevSuiteStarted.ps1",
+        "Common\Update-Modules.ps1", "Common\Update-BCContainerHelperModule.ps1", "Common\Get-PSDevelopmentConfig.ps1"
+         )
     
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData          = @{

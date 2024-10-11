@@ -1,61 +1,75 @@
 <#
 .SYNOPSIS
-This function fetches available Business Central App packages from a specified DevSuite.
+This function retrieves the available BC app package from the specified DevSuite.
 
 .DESCRIPTION
-The function Get-DevSuiteAvailableBCAppPackage uses the DevSuite and BearerToken parameters to retrieve a list of available Business Central App packages. It allows filtering by AppName, and optionally by whether the app is a Test App or a Preview. The function returns the last app in the sorted list.
+The function Get-DevSuiteAvailableBCAppPackage retrieves the specified BC app package information from the provided DevSuite. 
+The function filters the app packages based on the provided AppName, TestApp, and Preview switches. The function returns the app package sorted by the app version.
 
 .PARAMETER DevSuite
-This is a mandatory parameter that specifies the DevSuite from which the available Business Central App packages will be fetched.
+This parameter specifies the name or description of the DevSuite from which the app package information is to be retrieved. 
+This is a mandatory parameter.
 
 .PARAMETER AppName
-This is a mandatory parameter that specifies the name of the app to filter from the list of available Business Central App packages.
+This parameter specifies the name of the app for which the package information is to be retrieved from the DevSuite. 
+This is a mandatory parameter.
 
 .PARAMETER TestApp
-This is an optional switch parameter. If used, the function will include Test Apps in its return. If not used, Test Apps will be excluded.
+This switch parameter determines whether to include test apps in the retrieved app packages. 
+If not specified, the function will exclude test apps from the retrieved app packages.
 
 .PARAMETER Preview
-This is an optional switch parameter. If used, the function will include Preview Apps in its return. If not used, Preview Apps will be excluded.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+This switch parameter determines whether to include preview apps in the retrieved app packages. 
+If not specified, the function will exclude preview apps from the retrieved app packages.
 
 .EXAMPLE
-Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "AppName1" -BearerToken "1234567890"
-
-This example fetches available Business Central App packages from DevSuite1, filters by AppName1, excludes Test Apps and Preview Apps, and uses the BearerToken 1234567890 for authentication.
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1"
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1".
 
 .EXAMPLE
-Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "AppName1" -TestApp -Preview -BearerToken "1234567890"
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1" -TestApp
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1", including test apps.
 
-This example fetches available Business Central App packages from DevSuite1, filters by AppName1, includes Test Apps and Preview Apps, and uses the BearerToken 1234567890 for authentication.
+.EXAMPLE
+PS C:\> Get-DevSuiteAvailableBCAppPackage -DevSuite "DevSuite1" -AppName "App1" -Preview
+This command retrieves the app package information for the app named "App1" from the DevSuite named "DevSuite1", including preview apps.
 #>
 function Get-DevSuiteAvailableBCAppPackage {
-    Param (
-        [Parameter(Mandatory = $true)]
+    Param (        
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
         [string] $DevSuite,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true, Position = 1)]
+        [Alias("App")]
         [string] $AppName,
         [Parameter(Mandatory = $false)]
         [Switch] $TestApp,
         [Parameter(Mandatory = $false)]
-        [Switch] $Preview,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Switch] $Preview       
     )
-
-    $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite -BearerToken $BearerToken   
-    $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
-    if (-not $TestApp) {
-        $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isTestApp -eq $false }
+    BEGIN {
+        Write-Debug "Getting app package info of $AppName from devsuite '$DevSuite'" 
     }
 
-    if (-not $Preview) {
-        $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isPreview -eq $false }
-    }
+    PROCESS {   
 
-    $selectedApp = $selectedAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1   
-    return  $selectedApp
+        $appPackages = Get-DevSuiteAvailableBCAppPackages -DevSuite $DevSuite
+        $selectedAppPackages = $appPackages | Where-Object { $_.name -eq $AppName } 
+        if (-not $TestApp) {
+            $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isTestApp -eq $false }
+        }
+
+        if (-not $Preview) {
+            $selectedAppPackages = $selectedAppPackages  | Where-Object { $_.isPreview -eq $false }
+        }
+
+        $selectedApp = $selectedAppPackages | Sort-Object { [Version] ($_.appVersion -replace "-dev$") } | Select-Object -Last 1       
+        Write-Output $selectedApp
+    }
+    END {}  
 }
 
 Export-ModuleMember -Function Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuiteApp" -Value Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuiteAppPackage" -Value Get-DevSuiteAvailableBCAppPackage
+New-Alias "Get-DevSuitePackage" -Value Get-DevSuiteAvailableBCAppPackage

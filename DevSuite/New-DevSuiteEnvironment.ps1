@@ -1,124 +1,139 @@
-﻿<#
-.SYNOPSIS
-This function creates a new DevSuite environment with a specified configuration.
-
-.DESCRIPTION
-The New-DevSuiteEnvironment function creates a new DevSuite environment with a specified configuration. The function uses the configuration parameters to create a JSON object, which is then sent to the DevSuite Uri via a POST web request. After initiating the creation of the environment, the function waits for up to a specified number of minutes for the environment to become available.
-
-.PARAMETER ProjectNo
-The ProjectNo parameter is a mandatory string parameter that specifies the project number.
-
-.PARAMETER ProjectDescription
-The ProjectDescription parameter is a mandatory string parameter that specifies the project description.
-
-.PARAMETER ProjectManagement
-The ProjectManagement parameter is a mandatory string parameter that specifies the project manager.
-
-.PARAMETER CustomerNo
-The CustomerNo parameter is a mandatory string parameter that specifies the customer number.
-
-.PARAMETER CustomerName
-The CustomerName parameter is a mandatory string parameter that specifies the customer name.
-
-.PARAMETER Branch
-The Branch parameter is a mandatory string parameter that specifies the branch.
-
-.PARAMETER Department
-The Department parameter is a mandatory string parameter that specifies the department.
-
-.PARAMETER CostCenter
-The CostCenter parameter is a mandatory string parameter that specifies the cost center.
-
-.PARAMETER LeadDeveloper
-The LeadDeveloper parameter is a mandatory string parameter that specifies the lead developer.
-
-.PARAMETER ArtifactUrl
-The ArtifactUrl parameter is a mandatory string parameter that specifies the artifact URL.
-
-.PARAMETER AzureDevOps
-The AzureDevOps parameter is a mandatory string parameter that specifies the Azure DevOps.
-
-.PARAMETER KumaTarget
-The KumaTarget parameter is a mandatory string parameter that specifies the Kuma target.
-
-.PARAMETER BearerToken
-The BearerToken parameter is a mandatory string parameter that specifies the bearer token for authenticating the web request.
-
-.PARAMETER TimeoutMinutes
-The TimeoutMinutes parameter is an optional integer parameter that specifies the timeout for the creation process in minutes. The default value is 45 minutes.
-
-.EXAMPLE
-New-DevSuiteEnvironment -ProjectNo "12345" -ProjectDescription "Project1" -ProjectManagement "Manager1" -CustomerNo "Cust1" -CustomerName "Customer1" -Branch "Branch1" -Department "Dept1" -CostCenter "CC1" -LeadDeveloper "Developer1" -ArtifactUrl "https://artifacturl.com" -AzureDevOps "https://azuredevops.com" -KumaTarget "Target1" -BearerToken "abc123"
-
-This example creates a new DevSuite environment with the specified configuration, using the bearer token "abc123". The function will wait for up to 45 minutes for the environment to become available.
-#>
-function New-DevSuiteEnvironment {
+﻿function New-DevSuiteEnvironment {
     Param (
         [Parameter(Mandatory = $true)]
-        [string] $ProjectNo,
+        [ValidateSet("Healthcare", "Medtec")]
+        [string] $Solution,
         [Parameter(Mandatory = $true)]
-        [string] $ProjectDescription,
+        [string] $Version,
         [Parameter(Mandatory = $true)]
-        [string] $ProjectManagement,
-        [Parameter(Mandatory = $true)]
-        [string] $CustomerNo,
-        [Parameter(Mandatory = $true)]
-        [string] $CustomerName,
-        [Parameter(Mandatory = $true)]
-        [string] $Branch,
-        [Parameter(Mandatory = $true)]
-        [string] $Department,        
-        [Parameter(Mandatory = $true)]
-        [string] $CostCenter,
-        [Parameter(Mandatory = $true)]
-        [string] $LeadDeveloper,
-        [Parameter(Mandatory = $true)]
-        [string] $ArtifactUrl,
-        [Parameter(Mandatory = $true)]
-        [string] $AzureDevOps,
-        [Parameter(Mandatory = $true)]
-        [string] $KumaTarget,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken,
+        [string] $NewDevSuite,
         [Parameter(Mandatory = $false)]
-        [int] $TimeoutMinutes = 45
+        [string] $MigrationDevSuite,
+        [Parameter(Mandatory = $true)]
+        [string] $Tenant,
+        [Parameter(Mandatory = $false)]        
+        [string] $LicensePath,
+        [Parameter(Mandatory = $false)]
+        [string[]] $Users = @("kuma", "kuma1", "kuma2", "kuma3", "kuma4", "kuma5"),
+        [Parameter(Mandatory = $false)]
+        [string[]] $InstallApps = @("Quality Management", "KUMAVISION base", "KUMAVISION base DACH"),
+        [Parameter(Mandatory = $false)]
+        [string[]] $InstallPreviewApps = @(),
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipCreation,
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipMigration,
+        [Parameter(Mandatory = $false)]
+        [switch] $SkipCronus,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Sandbox", "OnPrem")]
+        [string] $Type = 'Sandbox'
     )
+    Write-Host "## Process started ##" -ForegroundColor Green
 
-    $jsonObject = @{
-        "projectNumber"      = $ProjectNo
-        "projectDescription" = $ProjectDescription
-        "projectManager"     = $ProjectManagement
-        "leadDeveloper"      = $LeadDeveloper
-        "branch"             = $Branch
-        "customerName"       = $CustomerName
-        "customerNumber"     = $CustomerNo
-        "department"         = $Department
-        "costCenter"         = $CostCenter
-        "artifactUrl"        = $ArtifactUrl
-        "linkDevOps"         = $AzureDevOps
-        "linkKumaTarget"     = $KumaTarget
-    } | ConvertTo-Json
+    if (-not $SkipMigration.IsPresent) {
+        if (-not $MigrationDevSuite) {
+            throw "Parameter 'MigrationDevSuite' is required when 'SkipMigration' is not present."
+        }      
+        if (-not $LicensePath) {
+            throw "Parameter 'LicensePath' is required when 'SkipMigration' is not present."
+        }  
+    }
 
-    $uri = Get-DevSuiteUri -Route 'vm'
-    Invoke-DevSuiteWebRequest -Uri $uri -Method POST -BearerToken $BearerToken -Body $jsonObject
+    if (-not $SkipCreation.IsPresent) {         
+        if (-not $LicensePath) {
+            throw "Parameter 'LicensePath' is required when 'SkipCreation' is not present."
+        }  
+    }
 
-    # Startzeit festlegen
-    $startTime = Get-Date
+    $script:ArtefactUrl = Get-BusinessCentralArtifactUrl -Country "de" -Version $Version -Select Latest -Type $Type
+    if (-not $script:ArtefactUrl){
+        throw "Cannot find artefact url for country 'de', version $version, Select Latest, Type $Type"
+    }
 
-    # Schleife, die bis zu 45 Minuten läuft
-    while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {    
-        $elapsedTime = (Get-Date) - $startTime
-        $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
-        Write-Host "Waiting $minutes minutes: " -NoNewline
-        if (Test-DevSuiteEnvironment -NameOrDescription $ProjectDescription -BearerToken $BearerToken) {            
-            $devSuite = Get-DevSuiteEnvironment -NameOrDescription $ProjectDescription -BearerToken $BearerToken
-            return $devSuite            
+    if ($Solution -eq "Medtec") {
+        $script:ProjectNo = $Global:Config.DevSuiteMedtecProjectNo
+        $script:AzureDevOps = $Global:Config.DevSuiteMedtecAzureDevOps
+        $script:KUMATarget = $Global:Config.DevSuiteMedtecKUMATarget
+    }
+    else {
+        $script:ProjectNo = $Global:Config.DevSuiteHealthcareProjectNo
+        $script:AzureDevOps = $Global:Config.DevSuiteHealthcareAzureDevOps
+        $script:KUMATarget = $Global:Config.DevSuiteHealthcareKUMATarget
+    }
+
+    if (-not $SkipCreation.IsPresent) {
+        New-DevSuite `
+            -ProjectNo $script:ProjectNo `
+            -ProjectDescription $NewDevSuite `
+            -CustomerNo $Global:Config.DevSuiteCustomerNo `
+            -CustomerName $Global:Config.DevSuiteCustomerName `
+            -ProjectManagement $Global:Config.DevSuiteProjectManagement `
+            -Branch $Global:Config.DevSuiteBranch `
+            -Department $Global:Config.DevSuiteDepartment `
+            -CostCenter $Global:Config.DevSuiteCostCenter `
+            -LeadDeveloper $Global:Config.DevSuiteLeadDeveloper `
+            -ArtifactUrl $script:ArtefactUrl  `
+            -AzureDevOps $script:AzureDevOps `
+            -KUMATarget $script:KUMATarget 
+
+        # Neue DevSuite object beschaffen        
+        $newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $NewDevSuite     
+        if (-not $newDevSuiteObj) {
+            throw "DevSuite '$NewDevSuite' konnte nicht erfolgreich angelegt werden."
         }    
-        Start-Sleep -Seconds 5
-    }    
-    throw "New-DevSuiteEnvironment timeout"
+    }
+
+    if (-not $SkipMigration.IsPresent) {
+
+        if (-not (Test-DevSuiteStarted -DevSuite $MigrationDevSuite)) {
+            Start-DevSuite -DevSuite $MigrationDevSuite
+        }
+
+        # Neue DevSuite object beschaffen        
+        $script:newDevSuiteObj = Get-DevSuiteEnvironment -DevSuite $NewDevSuite     
+        if (-not $script:newDevSuiteObj) {
+            throw "DevSuite '$NewDevSuite' nicht gefunden."
+        }    
+
+        # Migrations DevSuite object beschaffen
+        $script:migrationDevSuite = Get-DevSuiteEnvironment -DevSuite $MigrationDevSuite
+        if (-not $script:migrationDevSuite) {
+            throw "DevSuite '$MigrationDevSuite' nicht gefunden."
+        }     
+
+        Invoke-DevSuiteMigrate -SourceResourceGroup $script:migrationDevSuite.resourceGroup `
+            -SourceDevSuite $script:migrationDevSuite.name `
+            -SourceTenant $Tenant `
+            -DestinationResourceGroup $script:newDevSuiteObj.resourceGroup `
+            -DestinationDevSuite $script:newDevSuiteObj.name `
+            -DestinationTenant $Tenant
+        
+        $TenantObj = Get-DevSuiteTenant -DevSuite $NewDevSuite -Tenant  $Tenant
+        if (-not $TenantObj) {
+            throw "Tenant ' $Tenant' konnte nicht erfolreich in $NewDevSuite angelegt werden."
+        } 
+    }
+    
+    # Install License
+    Import-DevSuiteLicense -DevSuite $NewDevSuite -Path $LicensePath
+
+    # Installation App in test-Tenant
+    Install-DevSuiteBCAppPackages `
+        -InstallApps $InstallApps `
+        -InstallPreviewApps $InstallPreviewApps `
+        -Tenant $Tenant `
+        -DevSuite $NewDevSuite
+
+    foreach ($User in $Users) {
+        New-DevSuiteUser -UserName $User -DevSuite $NewDevSuite -Tenant $Tenant -ErrorAction SilentlyContinue
+    }
+
+    # cronusag tenant anlegen
+    if (-not $SkipCronus) {
+        Invoke-DevSuiteCopy -DevSuite $NewDevSuite -SourceTenant "default" -DestinationTenant "cronusag"
+    } 
+    
+    Write-Host "## Process completed ##" -ForegroundColor Green
 }
-Export-ModuleMember -Function  New-DevSuiteEnvironment
-
-
-
+Export-ModuleMember -Function  New-DevSuiteEnvironment  

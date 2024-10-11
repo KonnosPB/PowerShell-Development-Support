@@ -1,43 +1,49 @@
 <#
 .SYNOPSIS
-This function retrieves a specific DevSuite environment based on the provided Name or Description.
+The Get-DevSuiteEnvironment function retrieves the information of a specific DevSuite environment based on its name or description.
 
 .DESCRIPTION
-The Get-DevSuiteEnvironment function uses the NameOrDescription and BearerToken parameters to fetch a specific DevSuite environment. If the environment does not exist in the global DevSuiteEnvironments variable, the function will update it by invoking the Get-DevSuiteEnvironments function with the provided BearerToken.
+The Get-DevSuiteEnvironment function is used to fetch and display the details of a DevSuite environment. It can accept the name or description of the environment as an input parameter. This function searches for the environment in the global DevSuiteEnvironments object and returns the first match.
 
 .PARAMETER NameOrDescription
-This is a mandatory parameter specifying the Name or Description of the DevSuite environment to be retrieved.
-
-.PARAMETER BearerToken
-This is a mandatory parameter that specifies the Bearer Token to be used for authentication.
+This is a mandatory string parameter. It can accept either the name or description of a DevSuite environment. The function will match this parameter against the name or project description of the environments stored in the global DevSuiteEnvironments object.
 
 .EXAMPLE
-Get-DevSuiteEnvironment -NameOrDescription "DevSuite1" -BearerToken "1234567890"
+Get-DevSuiteEnvironment -DevSuite "Test Environment"
+This will fetch and display the details of the "Test Environment" from the global DevSuiteEnvironments object.
 
-This example retrieves the DevSuite environment with the name or description "DevSuite1", using the BearerToken 1234567890 for authentication.
+.EXAMPLE
+"Test Environment" | Get-DevSuiteEnvironment
+This will also fetch and display the details of the "Test Environment" from the global DevSuiteEnvironments object. Here, the input is passed through the pipeline.
 #>
 function Get-DevSuiteEnvironment {
     Param (
-        [Parameter(Mandatory = $true)]
-        [string] $NameOrDescription,
-        [Parameter(Mandatory = $true)]
-        [string] $BearerToken
+        [Parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true, Position = 0)]
+        [Alias("Name", "Description", "NameOrDescription")]
+        [string] $DevSuite
     )
-    try {
-        $devSuite = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1
-        if ($devSuite) {
-            return $devSuite
+    BEGIN {}
+
+    PROCESS {
+        try {
+            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -match $DevSuite) -or ($_.projectDescription -match $DevSuite) } | Select-Object -First 1
+            if ($devSuiteObj) {
+                Write-Output $devSuiteObj      
+                #return $devSuiteObj   
+                return
+            }
+        
+            Write-Debug "Getting devsuite info of '$DevSuite'"
+            $Global:DevSuiteEnvironments = Get-DevSuiteEnvironments
+            $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -match $DevSuite) -or ($_.projectDescription -match $DevSuite) } | Select-Object -First 1         
+            Write-Output $devSuiteObj
         }
-        $Global:DevSuiteEnvironments = Get-DevSuiteEnvironments -BearerToken $BearerToken
-        $devSuiteObj = $Global:DevSuiteEnvironments | Where-Object { ($_.name -eq $NameOrDescription) -or ($_.projectDescription -eq $NameOrDescription) } | Select-Object -First 1
-        if ($devSuiteObj) {
-            return $devSuiteObj
+        catch {
+            Write-Output $null
         }
-        return $null
     }
-    catch {
-        return $null
-    }
+    END {}  
 }
 
 Export-ModuleMember -Function Get-DevSuiteEnvironment
+New-Alias "Get-DevSuite" -Value Get-DevSuiteEnvironment

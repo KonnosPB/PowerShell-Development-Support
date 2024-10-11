@@ -24,24 +24,24 @@ This example adds the Jira tickets with keys 'KEY-1' and 'KEY-2' to the respecti
 function Add-JiraTicketsToPullRequests {
     Param (        
         [Parameter(Mandatory = $false)]
-        [PSCustomObject[]] $AzureDevOpsPullRequests,
+        [PSCustomObject[]] $AzureDevOpsPullRequestWorkItems,
         [Parameter(Mandatory = $true)]
         [string] $JiraApiToken
     )
-    if (-not $AzureDevOpsPullRequests){
+    if (-not $AzureDevOpsPullRequestWorkItems){
         return
     }
-    foreach ($azureDevOpsPullRequest in $AzureDevOpsPullRequests) {
-        #$jiraIssueId = $azureDevOpsPullRequest.fields."Custom.JiraIssueId"
-        $jiraIssueKey = $azureDevOpsPullRequest.fields."Custom.JiraIssueKey"
-        $uri = Get-JiraUri -Route "rest/api/latest/issue/$jiraIssueKey"        
+    foreach ($azureDevOpsPullRequestWorkItem in $AzureDevOpsPullRequestWorkItems) {
+        #$jiraIssueId = $azureDevOpsPullRequestWorkItem.fields."Custom.JiraIssueId"
+        $jiraIssueKey = $azureDevOpsPullRequestWorkItem.fields."Custom.JiraIssueKey"
+        $uri = Get-JiraUri -Route "/rest/api/latest/issue/$jiraIssueKey"        
         $response = Invoke-JiraWebRequest -Uri $uri -Method "GET"  -JiraApiToken $JiraApiToken    
         if ($response.StatusCode -ne 200) {
             Write-Error "Add-JiraTicketsToPullRequests for jira ticket item $jiraIssueKey failed with status code: $($response.StatusCode) $($response.StatusDescription)" 
             exit
         }   
         $jJiraIssue = $response.Content | ConvertFrom-Json 
-        $azureDevOpsPullRequest | Add-Member -MemberType NoteProperty -Name jiraIssue -Value $jJiraIssue  
+        $azureDevOpsPullRequestWorkItem | Add-Member -MemberType NoteProperty -Name jiraIssue -Value $jJiraIssue  
     }
 }
 Export-ModuleMember -Function Add-JiraTicketsToPullRequests

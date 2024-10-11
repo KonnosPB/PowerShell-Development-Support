@@ -49,7 +49,7 @@ function Invoke-JiraWebRequest {
         [Parameter(Mandatory = $false)]
         [switch] $SkipErrorHandling
     )
-    $authorizationContent = "$($Global:Config.JiraEMailAddress):$JiraApiToken"
+    $authorizationContent = $JiraApiToken
     $basicAuthorizationContent = "Basic $([System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes($authorizationContent )))"
     $authHeaders = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
     $authHeaders.Add("Authorization", $basicAuthorizationContent)
@@ -58,16 +58,15 @@ function Invoke-JiraWebRequest {
 
     if ($Body) {
         $authHeaders.Add("Content-Type", $ContentType)
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body" -NoNewline  
+        Write-Debug "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method -Body $Body"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders -Body $Body  
     }
     else {
-        Write-Host "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method" -NoNewline  
+        Write-Debug "$callingCommandFile : Invoke-JiraWebRequest -Uri $Uri -Method $Method"  
         $result = Invoke-WebRequest -Uri $Uri -Method $Method -Headers $authHeaders 
     }  
     
-    if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {
-        Write-Host " ✅"
+    if ($result.StatusCode -ge 200 -and $result.StatusCode -lt 300) {        
         return($result);
     }
     else {
