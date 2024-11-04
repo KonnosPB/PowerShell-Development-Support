@@ -55,6 +55,7 @@ function Invoke-DevSuiteCopy {
 
     # Schleife, die bis zu 45 Minuten läuft
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {  
+        Start-Sleep -Seconds 600 # 10 Minutes
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
@@ -63,8 +64,7 @@ function Invoke-DevSuiteCopy {
         if ($tenant -and (@('Mounted', 'Operational') -contains $tenant.Status)) {  
             Write-Host "Tenant $DestinationTenant successfully copied and mounted" -ForegroundColor Green        
             return $tenant           
-        }    
-        Start-Sleep -Seconds 60
+        }            
     }    
     throw "Timeout migrating tenant '$SourceTenant' from '$SourceDevSuite' into '$DestinationDevSuite'!"
 }

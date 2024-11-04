@@ -27,6 +27,7 @@ function Wait-DevSuiteTenantsReady {
     $startTime = Get-Date
 
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes([int] $TimeoutMinutes)) {   
+        Start-Sleep -Seconds 300 # 5 Minutes
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
@@ -43,8 +44,7 @@ function Wait-DevSuiteTenantsReady {
         }      
         catch {
             Write-Debug $_
-        }
-        Start-Sleep -Seconds 180
+        }        
     }    
 
     throw "Wait-DevSuiteTenantsReady timeout"

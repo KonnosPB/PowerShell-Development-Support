@@ -111,6 +111,7 @@ function Install-DevSuiteBCAppPackages {
 
     # Schleife, die bis zu 45 Minuten läuft
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) { 
+        Start-Sleep -Seconds 180
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
@@ -120,8 +121,7 @@ function Install-DevSuiteBCAppPackages {
         if ($publishedApp) {
             Write-Host "App $publishedApp successfully published" -ForegroundColor Green
             return $publishedApp
-        }        
-        Start-Sleep -Seconds 60
+        }                
     }    
     throw "Timeout publishing app packages ($([string]::Join(', ' ,$InstallApps))) and preview apps ($([string]::Join(', ', $InstallPreviewApps))) into devsuite '$DevSuite' tenant '$Tenant'"
 }

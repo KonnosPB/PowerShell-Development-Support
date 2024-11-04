@@ -23,6 +23,7 @@ function Start-DevSuite {
 
     # Schleife, die bis zu 45 Minuten läuft
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {    
+        Start-Sleep -Seconds 300 # 5 Minutes 
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
@@ -33,8 +34,7 @@ function Start-DevSuite {
             Wait-DevSuiteTenantsReady -DevSuite $devSuiteName  -TimeoutMinutes $TimeoutMinutes
             Write-Host "Tenants of devsuite '$DevSuite' also ready" -ForegroundColor Green         
             return $devSuiteObj            
-        }    
-        Start-Sleep -Seconds 60
+        }            
     }    
     
     throw "Timeout starting devsuite '$DevSuite'!"

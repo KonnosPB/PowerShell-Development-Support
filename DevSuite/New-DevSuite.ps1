@@ -115,8 +115,11 @@ function New-DevSuite {
     # Startzeit festlegen
     $startTime = Get-Date
 
+    Start-Sleep -Seconds 5400  # 1.5 Hours
+
     # Schleife, die bis zu 45 Minuten läuft
     while ((Get-Date) - $startTime -lt [TimeSpan]::FromMinutes($TimeoutMinutes)) {    
+        Start-Sleep -Seconds 1800  # 30 Minutes
         $elapsedTime = (Get-Date) - $startTime
         $minutes = [math]::Truncate($elapsedTime.TotalMinutes)        
         $percentComplete = ($minutes / $TimeoutMinutes * 100)
@@ -126,8 +129,7 @@ function New-DevSuite {
             Wait-DevSuiteTenantsReady -DevSuite $ProjectDescription -TimeoutMinutes $TimeoutMinutes
             Write-Host "Tenants of devsuite '$ProjectDescription' also ready" -ForegroundColor Green         
             return $devSuite            
-        }    
-        Start-Sleep -Seconds 60
+        }            
     }    
 
     throw "Timeout creating new devsuite '$ProjectDescription'!"
